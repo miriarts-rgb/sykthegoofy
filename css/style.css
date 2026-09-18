@@ -1,0 +1,489 @@
+/* Tema único, escuro por decisão de identidade: noite no campo de morangos.
+   Sem media query de esquema e sem data-theme — todas as cores são pintadas
+   explicitamente aqui, então a página não depende do fundo do visualizador. */
+:root{
+  color-scheme:dark;
+  --sun:#F0B63B; --sun-deep:#C98C13; --sun-pale:#5C4413;
+  --berry:#E8544A; --berry-deep:#B93027;
+  --leaf:#8CC63F; --leaf-deep:#5E8F26;
+  --cocoa:#FFE9CE; --cocoa-soft:#C4A996;
+  --cream:#2E1F19; --cream-deep:#241713;
+  --blush:#F09BAC;
+  --ground:#1E1410;
+  /* tinta fixa para superfícies que são claras mesmo no escuro
+     (o amarelo do hero, o morango, a folha, o blush) */
+  --ink:#3E2A22; --ink-soft:#5A4036; --berry-ink:#8F1C16;
+  --berry-solid:#B93027; --link-on-cocoa:#9E2119; --berry-text:#FF8A7E;
+  --panel:#2B1D17;
+  --line:#7A5A48;
+  --seed:#C79A2E;
+  --ok:#7FC16C; --warn:#E0A252; --stop:#EE7A70;
+  --shadow:6px 6px 0 rgba(0,0,0,.42);
+  --shadow-sm:3px 3px 0 rgba(0,0,0,.42);
+  --r:18px;
+  --maxw:1120px;
+}
+
+*{box-sizing:border-box}
+/* Tema único escuro: tudo que o navegador pinta sozinho precisa de cor
+   explícita, senão herda o preto padrão e some no fundo escuro.
+   option, dialog e controles de formulário não herdam do body. */
+option,optgroup{background:var(--ground); color:var(--cocoa)}
+dialog{color:var(--cocoa)}
+details,summary,fieldset,legend{color:var(--cocoa)}
+button{color:inherit}
+input,select,textarea,button{font-family:inherit}
+::placeholder{color:var(--cocoa-soft); opacity:1}
+::selection{background:var(--berry-solid); color:#fff}
+/* toda superfície declara a própria tinta junto com o próprio fundo,
+   em vez de depender da herança */
+.quote,.fact,.price-card,.step,.gal figure,.qrow,.form-card,.rules li,
+.slots,.adm-sec,.kan-card,.kpi,.linkcard,.summary-out,.estimate,
+.adm-head,.adm-foot,.adm-tabs,.topbar,.opt span,.gal figcaption,
+.queue-list,.tiers,.details-body,.ych-body,.ych-card,
+section.cream,section.ground,.lb-bar,.lb-inner,.adm-body,.adm-pane,
+.gal figure,.qrow,.fgrid,.field,.about-grid,.facts{color:var(--cocoa)}
+body{
+  margin:0; background:var(--ground); color:var(--cocoa);
+  font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:"Fraunces","Georgia",serif; margin:0; text-wrap:balance; line-height:1.1}
+p{margin:0}
+a{color:inherit}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--berry); outline-offset:3px; border-radius:6px}
+
+/* ============ movimento ============ */
+:root{
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
+}
+@keyframes sy-float{0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)}}
+@keyframes sy-twinkle{0%,100%{opacity:.28} 50%{opacity:.62}}
+@keyframes sy-drift{0%{background-position:0 0} 100%{background-position:260px 200px}}
+@keyframes sy-marquee{0%{transform:translateX(0)} 100%{transform:translateX(-50%)}}
+@keyframes sy-pulse{0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.18)} 50%{box-shadow:0 0 0 7px rgba(127,193,108,.28)}}
+
+/* entrada ao rolar — a classe é aplicada por JS só em quem está abaixo
+   da dobra, então a primeira tela nunca fica esperando o observer */
+.reveal{opacity:0; transform:translateY(14px)}
+.reveal.in{opacity:1; transform:none; transition:opacity .38s var(--ease-out), transform .38s var(--ease-out)}
+/* filhos entram escalonados dentro do bloco que revelou */
+.reveal > *{opacity:0; transform:translateY(10px)}
+.reveal.in > *{opacity:1; transform:none;
+  transition:opacity .34s var(--ease-out), transform .34s var(--ease-out);
+  transition-delay:calc(var(--i,0) * 55ms)}
+
+/* abertura do hero no carregamento */
+@keyframes sy-rise{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
+.hero h1,.hero .lede,.hero .cta-row,.hero-art{
+  animation:sy-rise .52s var(--ease-out) both;
+}
+.hero h1{animation-delay:.02s}
+.hero .lede{animation-delay:.10s}
+.hero .cta-row{animation-delay:.18s}
+.hero-art{animation-delay:.14s}
+/* o flutuar começa depois que o cartão terminou de subir */
+.hero-art .sona{animation:sy-float 6s ease-in-out .7s infinite}
+/* o selo gira ao contrário do balanço, pra não parecer colado na arte */
+.sona-seal{animation:sy-seal 6s ease-in-out .7s infinite}
+@keyframes sy-seal{0%,100%{transform:rotate(-8deg) translateY(0)} 50%{transform:rotate(-5deg) translateY(3px)}}
+
+/* sementinhas soltas no fundo das faixas */
+.seedfall{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0}
+.seedfall i{position:absolute; width:7px; height:10px; border-radius:50%;
+  background:var(--seed); opacity:.42; animation:sy-bob 9s ease-in-out infinite}
+@keyframes sy-bob{0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-16px) rotate(18deg)}}
+section{position:relative}
+section > .wrap{position:relative; z-index:1}
+
+@media (prefers-reduced-motion:reduce){
+  /* mais suave, não zero: mantém o que ajuda a entender, corta o deslocamento */
+  .reveal{opacity:0; transform:none}
+  .reveal.in{transform:none; transition:opacity .2s ease}
+  .reveal > *{opacity:1; transform:none}
+  .hero h1,.hero .lede,.hero .cta-row,.hero-art{animation:none; opacity:1}
+  .hero-art .sona,.sona-seal,.hero::before,.mq-track,.dot.open,.seedfall i{animation:none !important}
+  .sona-seal{transform:rotate(-8deg)}
+  .btn:hover,.linkcard:hover,.price-card:hover,.gal figure:hover,.step:hover{transform:none !important}
+}
+
+.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:20px}
+.mono{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.eyebrow{
+  font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--cocoa-soft); display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:""; width:14px; height:16px; flex:none;
+  background:var(--berry);
+  clip-path:polygon(50% 100%,10% 62%,10% 28%,50% 8%,90% 28%,90% 62%);
+}
+
+/* ---------- cursor da casa ----------
+   Só em ponteiro fino: no toque não existe cursor. Desligável no topo,
+   e campos de texto mantêm o cursor do sistema para não atrapalhar. */
+@media (hover:hover) and (pointer:fine){
+  :root[data-cursor="on"] body{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cellipse cx='14' cy='18.5' rx='6.6' ry='5.4' fill='%23F2879B' stroke='%233E2A22' stroke-width='1.7'/%3E%3Cellipse cx='6.8' cy='12' rx='2.7' ry='3.3' fill='%23F2879B' stroke='%233E2A22' stroke-width='1.6'/%3E%3Cellipse cx='11.7' cy='8.6' rx='2.7' ry='3.5' fill='%23F2879B' stroke='%233E2A22' stroke-width='1.6'/%3E%3Cellipse cx='17' cy='8.8' rx='2.7' ry='3.4' fill='%23F2879B' stroke='%233E2A22' stroke-width='1.6'/%3E%3Cellipse cx='21.6' cy='12.6' rx='2.6' ry='3.1' fill='%23F2879B' stroke='%233E2A22' stroke-width='1.6'/%3E%3C/svg%3E") 9 7, auto;
+  }
+  :root[data-cursor="on"] a,
+  :root[data-cursor="on"] button,
+  :root[data-cursor="on"] summary,
+  :root[data-cursor="on"] .opt,
+  :root[data-cursor="on"] label.chipbtn{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='30' viewBox='0 0 24 28'%3E%3Cpath d='M12 27C6.2 27 2 21.4 2 15.2 2 9.6 6.2 6.6 12 6.6s10 3 10 8.6C22 21.4 17.8 27 12 27z' fill='%23D8352A' stroke='%233E2A22' stroke-width='1.8'/%3E%3Cpath d='M12 7C9.6 3.8 6.4 3.2 3.6 4.4c.9 1.8 2.6 2.9 4.5 3-1.6.7-2.5 1.6-2.6 2.6 1.9.1 3.8-.6 5.3-1.8V7z' fill='%236FA832' stroke='%233E2A22' stroke-width='1.5'/%3E%3Cpath d='M12 7c2.4-3.2 5.6-3.8 8.4-2.6-.9 1.8-2.6 2.9-4.5 3 1.6.7 2.5 1.6 2.6 2.6-1.9.1-3.8-.6-5.3-1.8V7z' fill='%236FA832' stroke='%233E2A22' stroke-width='1.5'/%3E%3Cg fill='%23F7D774'%3E%3Cellipse cx='8' cy='13.5' rx='1' ry='1.5'/%3E%3Cellipse cx='12' cy='11.8' rx='1' ry='1.5'/%3E%3Cellipse cx='16' cy='13.5' rx='1' ry='1.5'/%3E%3Cellipse cx='10' cy='17.8' rx='1' ry='1.5'/%3E%3Cellipse cx='14' cy='17.8' rx='1' ry='1.5'/%3E%3C/g%3E%3C/svg%3E") 13 3, pointer;
+  }
+  :root[data-cursor="on"] input,
+  :root[data-cursor="on"] textarea,
+  :root[data-cursor="on"] select{cursor:auto}
+  :root[data-cursor="on"] .gal figure button.open{cursor:zoom-in}
+}
+
+/* rastro de patinhas */
+.paw-layer{position:fixed; inset:0; pointer-events:none; z-index:90}
+.paw{position:absolute; display:block; pointer-events:none; color:var(--blush);
+  filter:drop-shadow(0 1px 0 var(--cocoa))}
+.paw svg{display:block}
+.paw-stamp{z-index:2}
+.paw-stamp svg{width:34px; height:34px}
+.paw-ring{position:absolute; width:76px; height:76px; border-radius:50%;
+  border:3px solid var(--blush); pointer-events:none}
+
+/* ---------- recorte de canteiro ---------- */
+.scallop{height:22px; width:100%; display:block;
+  -webkit-mask:radial-gradient(circle at 50% 0,transparent 68%,#000 69%) 0 0/44px 22px repeat-x;
+  mask:radial-gradient(circle at 50% 0,transparent 68%,#000 69%) 0 0/44px 22px repeat-x;}
+.scallop.up{-webkit-mask:radial-gradient(circle at 50% 100%,transparent 68%,#000 69%) 0 0/44px 22px repeat-x;
+  mask:radial-gradient(circle at 50% 100%,transparent 68%,#000 69%) 0 0/44px 22px repeat-x;}
+
+/* ---------- topo ---------- */
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:60;
+  background:var(--cream); border-bottom:3px solid var(--line);
+}
+.topbar .wrap{display:flex; align-items:center; gap:16px; min-height:62px; flex-wrap:wrap; padding-block:8px}
+.brand{display:flex; align-items:center; gap:10px; font-family:"Fraunces",serif; font-weight:900; font-size:1.3rem; text-decoration:none}
+.nav{display:flex; gap:4px; margin-inline-start:auto; flex-wrap:wrap}
+.nav a{
+  text-decoration:none; font-weight:700; font-size:.88rem; padding:7px 12px; border-radius:999px;
+  border:2px solid transparent; white-space:nowrap;
+}
+.nav a:hover{border-color:var(--line); background:var(--sun); color:var(--ink)}
+/* o pedir sai da lista de links e vira botão: é a ação da página,
+   não mais um destino entre outros */
+.nav-order{
+  text-decoration:none; font-family:"Fraunces",serif; font-weight:900; font-size:.98rem;
+  background:var(--berry-solid); color:#fff; border:3px solid var(--line);
+  border-radius:999px; padding:9px 22px; white-space:nowrap;
+  box-shadow:var(--shadow-sm);
+  transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out);
+}
+@media (hover:hover) and (pointer:fine){
+  .nav-order:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 rgba(0,0,0,.4)}
+}
+.nav-order:active{transform:translate(1px,1px); box-shadow:1px 1px 0 rgba(0,0,0,.4)}
+.tools{display:flex; gap:8px; align-items:center}
+.chipbtn{
+  font-family:"DM Mono",monospace; font-size:.74rem; font-weight:500; cursor:pointer;
+  border:2px solid var(--line); background:var(--panel); color:var(--cocoa);
+  border-radius:999px; padding:6px 11px;
+}
+.chipbtn:hover{background:var(--sun); color:var(--ink)}
+.chipbtn[aria-pressed="true"]{background:var(--cocoa); color:var(--ground); border-color:var(--cocoa)}
+
+/* ---------- status ---------- */
+.statusbar{background:var(--cocoa); color:var(--ground); border-bottom:3px solid var(--line)}
+.statusbar .wrap{display:flex; align-items:center; gap:12px; padding-block:9px; flex-wrap:wrap; font-size:.85rem}
+.dot{width:10px; height:10px; border-radius:50%; flex:none; box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+.dot.open{background:#7FC16C} .dot.closed{background:#EE7A70}
+
+/* ---------- hero ---------- */
+.hero{position:relative; background:var(--sun); color:var(--ink); border-bottom:3px solid var(--line); overflow:hidden}
+.hero .eyebrow{color:var(--ink-soft)}
+.hero::before{
+  content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+  background-image:
+    radial-gradient(ellipse 3px 5px at 12% 22%,var(--seed) 60%,transparent 61%),
+    radial-gradient(ellipse 3px 5px at 78% 14%,var(--seed) 60%,transparent 61%),
+    radial-gradient(ellipse 3px 5px at 33% 72%,var(--seed) 60%,transparent 61%),
+    radial-gradient(ellipse 3px 5px at 61% 55%,var(--seed) 60%,transparent 61%),
+    radial-gradient(ellipse 3px 5px at 90% 80%,var(--seed) 60%,transparent 61%),
+    radial-gradient(ellipse 3px 5px at 46% 30%,var(--seed) 60%,transparent 61%);
+  background-size:260px 200px;
+  animation:sy-drift 48s linear infinite alternate, sy-twinkle 5s ease-in-out infinite;
+}
+.dot.open{animation:sy-pulse 2.4s ease-in-out infinite}
+
+/* ---------- faixa rolante ---------- */
+.marquee{background:var(--cocoa); color:var(--ground); border-bottom:3px solid var(--line);
+  overflow:hidden; padding-block:11px}
+.mq-track{display:flex; width:max-content; animation:sy-marquee 42s linear infinite}
+.mq-track span{font-family:"DM Mono",monospace; font-size:.8rem; letter-spacing:.14em;
+  text-transform:uppercase; padding-inline:18px; white-space:nowrap; display:inline-flex;
+  align-items:center; gap:18px}
+.mq-track span::after{content:""; width:11px; height:13px; flex:none; background:var(--sun);
+  clip-path:polygon(50% 100%,10% 62%,10% 28%,50% 8%,90% 28%,90% 62%)}
+.marquee:hover .mq-track{animation-play-state:paused}
+.hero .wrap{position:relative; padding-block:52px 60px; display:grid; gap:38px; grid-template-columns:1.25fr .75fr; align-items:center}
+/* o handle inteiro numa palavra só. Sem espaço para quebrar, o tamanho é
+   travado por vw para caber na coluna em qualquer largura; o nome dentro
+   dele é separado por cor, não por quebra de linha. */
+.hero h1{
+  font-size:clamp(2.4rem,10vw,5.6rem); font-weight:900;
+  letter-spacing:-.045em; line-height:1; max-width:100%;
+}
+.hero h1 em{font-style:normal; color:var(--berry-ink); -webkit-text-stroke:0}
+.lede{font-size:clamp(1.05rem,2.2vw,1.24rem); font-weight:600; max-width:34ch; margin-top:16px}
+.cta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:26px}
+.btn{
+  display:inline-flex; align-items:center; gap:9px; cursor:pointer; text-decoration:none;
+  font-weight:800; font-size:.95rem; padding:13px 22px; border-radius:999px;
+  border:3px solid var(--line); background:var(--panel); color:var(--cocoa);
+  box-shadow:var(--shadow-sm); transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out);
+}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 rgba(62,42,34,.22)}
+}
+.btn:active{transform:translate(1px,1px); box-shadow:1px 1px 0 rgba(62,42,34,.22); transition-duration:.1s}
+.btn.primary{background:var(--berry-solid); color:#fff; border-color:var(--line)}
+/* vazado: sem fundo próprio, então a tinta tem que ser a do fundo ATRÁS dele.
+   No hero esse fundo é sempre o amarelo, logo tinta escura fixa nos dois temas. */
+.btn.ghost{background:transparent}
+.hero .btn.ghost{color:var(--ink); border-color:var(--ink); box-shadow:3px 3px 0 rgba(62,42,34,.2)}
+.hero .btn.ghost:hover{background:rgba(255,244,226,.55)}
+.hero-art{display:flex; justify-content:center}
+.sona{position:relative; width:100%; max-width:380px}
+.sona img{display:block; width:100%; height:auto;
+  filter:drop-shadow(5px 7px 0 rgba(62,42,34,.22))}
+.sona-seal{
+  /* o selo fica sobre o amarelo do hero, que é claro nos dois temas.
+     Por isso creme e traço fixos, não tokens que invertem no escuro. */
+  position:absolute; right:2px; bottom:6px; text-align:center;
+  background:#FFF4E2; border:3px solid #3E2A22; border-radius:50%;
+  width:130px; height:130px; display:grid; align-content:center; gap:4px;
+  padding-inline:12px; box-shadow:3px 3px 0 rgba(62,42,34,.24); transform:rotate(-8deg);
+}
+/* easter egg: área do nariz. Para reposicionar, mexa só em left/top —
+   são porcentagens da própria arte, então acompanham qualquer tamanho. */
+#nose{
+  position:absolute; left:50%; top:46%; width:7.5%; aspect-ratio:1;
+  transform:translate(-50%,-50%); z-index:3;
+  background:transparent; border:0; padding:0; border-radius:50%;
+  -webkit-tap-highlight-color:transparent;
+}
+#nose:focus-visible{outline:3px solid var(--berry); outline-offset:2px}
+.sona.honk img{animation:sy-honk .42s cubic-bezier(0.23,1,0.32,1)}
+@keyframes sy-honk{
+  0%{transform:scale(1)} 28%{transform:scale(.965) rotate(-1.2deg)}
+  62%{transform:scale(1.015) rotate(.6deg)} 100%{transform:scale(1)}
+}
+.honk-note{position:absolute; left:50%; top:40%; z-index:4; pointer-events:none;
+  font-family:"Fraunces",serif; font-weight:900; font-size:1.5rem; color:var(--berry-ink)}
+
+.sona-seal span{font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.05em;
+  line-height:1.3; color:#5A4036}
+.sona-seal b{font-family:"Fraunces",serif; font-weight:900; font-size:1.78rem; line-height:1;
+  color:#8F1C16}
+
+/* ---------- seções ---------- */
+section{padding-block:66px; border-bottom:3px solid var(--line)}
+section.cream{background:var(--cream)}
+section.ground{background:var(--ground)}
+.sec-head{max-width:62ch; margin-bottom:34px}
+.sec-head h2{font-size:clamp(1.8rem,4.2vw,2.7rem); font-weight:900; margin-block:10px 12px}
+.sec-head p{color:var(--cocoa-soft); font-size:1.02rem}
+
+/* ---------- sobre ---------- */
+.about-grid{display:grid; grid-template-columns:1fr 1fr; gap:30px; align-items:start}
+.quote{
+  background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:26px 28px;
+}
+.quote p{font-family:"Fraunces",serif; font-size:1.3rem; font-weight:600; line-height:1.45}
+.quote footer{margin-top:14px; font-family:"DM Mono",monospace; font-size:.78rem; letter-spacing:.08em; color:var(--cocoa-soft)}
+.facts{display:grid; gap:12px}
+.fact{display:flex; gap:14px; align-items:flex-start; background:var(--panel);
+  border:2px solid var(--line); border-radius:14px; padding:14px 16px}
+.fact svg{flex:none; margin-top:2px}
+.fact b{display:block; font-family:"Fraunces",serif; font-size:1.02rem}
+.fact span{font-size:.92rem; color:var(--cocoa-soft)}
+
+/* ---------- preços ---------- */
+/* align-items:start deixa cada card com a altura do próprio conteúdo,
+   em vez de esticar o mais curto até a altura do mais alto */
+.price-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px; align-items:start}
+.price-card{
+  background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:0; overflow:hidden; display:flex; flex-direction:column;
+}
+.price-card header{background:var(--sun); color:var(--ink); border-bottom:3px solid var(--line); padding:16px 20px}
+.price-card h3{font-size:1.25rem; font-weight:900}
+.price-card header span{font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-soft)}
+.tiers{padding:6px 20px 18px; display:grid; gap:2px}
+/* item sem preço fechado: uma linha só, em vez de repetir "a combinar" */
+.price-card.quoted .tiers{padding-block:16px 18px}
+.quote-line{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.quote-line p{font-size:.9rem; color:var(--cocoa-soft); max-width:30ch}
+.quote-line .amt{font-family:"DM Mono",monospace; font-size:.9rem; color:var(--cocoa-soft)}
+.tier{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  padding:13px 0; border-bottom:2px dotted var(--line)}
+.tier:last-child{border-bottom:0}
+.tier .name{font-weight:700}
+.tier .name small{display:block; font-weight:400; font-size:.78rem; color:var(--cocoa-soft)}
+.tier .amt{font-family:"DM Mono",monospace; font-weight:500; font-size:1.18rem; white-space:nowrap}
+.tier .amt.tbd{font-size:.86rem; color:var(--cocoa-soft)}
+/* card de acréscimos: mesma estrutura dos preços, cabeçalho morango
+   para dizer "isto modifica um preço, não é um item avulso" */
+.extras-card header{background:var(--berry-solid); border-bottom-color:var(--line)}
+.extras-card header h3,.extras-card header span{color:#fff}
+.extras-card header span{opacity:.82}
+.extras-card .amt.pct{color:var(--berry-text); font-size:1.1rem}
+.extras-card .tier{border-bottom-style:dotted}
+
+
+/* ---------- processo ---------- */
+.steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; counter-reset:s}
+.step{background:var(--panel); border:2px solid var(--line); border-radius:var(--r); padding:22px 20px; position:relative}
+.step .n{
+  font-family:"DM Mono",monospace; font-size:.78rem; font-weight:500;
+  width:30px; height:30px; display:grid; place-items:center; border-radius:50%;
+  background:var(--berry-solid); color:#fff; border:2px solid var(--line); margin-bottom:12px;
+}
+.step h3{font-size:1.18rem; margin-bottom:7px}
+.step p{font-size:.92rem; color:var(--cocoa-soft)}
+
+/* ---------- galeria ---------- */
+.filters{display:flex; gap:9px; flex-wrap:wrap; margin-bottom:26px}
+.gal{display:grid; grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:18px}
+.gal figure{margin:0; background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column}
+.gal .frame{aspect-ratio:1/1; max-width:100%; background:var(--sun-pale);
+  display:grid; place-items:center; border-bottom:3px solid var(--line); position:relative; overflow:hidden}
+.gal .frame img{width:100%; height:100%; object-fit:cover; display:block}
+.gal figcaption{padding:12px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.tag{font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--sun-pale); border:1.5px solid var(--line); border-radius:999px; padding:3px 9px}
+.gal-empty{grid-column:1/-1; text-align:center; padding:46px 20px; border:3px dashed var(--line);
+  border-radius:var(--r); color:var(--cocoa-soft)}
+
+/* ---------- fila ---------- */
+.queue-wrap{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start}
+.slots{background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:22px}
+.slots h3{font-size:1.1rem; margin-bottom:14px}
+.slot-dots{display:flex; gap:9px; flex-wrap:wrap; margin-bottom:14px}
+.slot-dot{width:30px; height:30px; border-radius:9px; border:2px solid var(--line); background:var(--panel)}
+.slot-dot.taken{background:var(--berry)}
+.slots p{font-size:.88rem; color:var(--cocoa-soft)}
+.queue-list{display:grid; gap:10px}
+.qrow{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center;
+  background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:13px 16px}
+.qrow .who{font-weight:700}
+.qrow .what{font-size:.85rem; color:var(--cocoa-soft)}
+.pill{font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+  border:2px solid var(--line); border-radius:999px; padding:4px 11px; white-space:nowrap}
+.pill.wait{background:var(--cream-deep)}
+.pill.sketch{background:var(--sun); color:var(--ink)}
+.pill.color{background:var(--blush); color:var(--ink)}
+.pill.done{background:var(--leaf); color:var(--ink)}
+.qnum{font-family:"DM Mono",monospace; font-size:.85rem; color:var(--cocoa-soft); width:22px}
+
+/* ---------- formulário ---------- */
+.form-card{background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:28px}
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.field{display:flex; flex-direction:column; gap:6px}
+.field.full{grid-column:1/-1}
+label{font-family:"DM Mono",monospace; font-size:.74rem; letter-spacing:.09em; text-transform:uppercase; color:var(--cocoa-soft)}
+input,select,textarea{
+  font-family:"Nunito",sans-serif; font-size:.95rem; color:var(--cocoa);
+  background:var(--ground); border:2px solid var(--line); border-radius:11px; padding:11px 13px; width:100%;
+}
+textarea{resize:vertical; min-height:96px}
+.summary-out{
+  margin-top:20px; background:var(--cream); border:2px dashed var(--line); border-radius:14px;
+  padding:18px; font-family:"DM Mono",monospace; font-size:.82rem; white-space:pre-wrap; line-height:1.7;
+}
+/* duas vias de pedido, lado a lado e rotuladas, para a pessoa escolher
+   em vez de adivinhar qual botão realmente envia */
+.send-ways{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px}
+.way{background:var(--ground); border:2px solid var(--line); border-radius:14px;
+  padding:18px 20px; display:flex; flex-direction:column; gap:8px; color:var(--cocoa)}
+.way h3{font-size:1.05rem}
+.way p{font-size:.86rem; color:var(--cocoa-soft); flex:1}
+.way .btn,.way-btns{margin-top:6px}
+.way-btns{display:flex; gap:10px; flex-wrap:wrap}
+.copied{font-size:.85rem; font-weight:700; color:var(--leaf)}
+@media (max-width:620px){ .send-ways{grid-template-columns:1fr} }
+
+/* ---------- ToS / FAQ ---------- */
+.tos-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start}
+.rules{display:grid; gap:11px; padding:0; margin:0; list-style:none}
+.rules li{display:flex; gap:12px; background:var(--panel); border:2px solid var(--line);
+  border-radius:13px; padding:14px 16px; font-size:.94rem}
+.rules li::before{content:""; width:13px; height:15px; flex:none; margin-top:4px; background:var(--berry);
+  clip-path:polygon(50% 100%,10% 62%,10% 28%,50% 8%,90% 28%,90% 62%)}
+details{background:var(--panel); border:3px solid var(--line); border-radius:var(--r); overflow:hidden}
+details+details{margin-top:12px}
+summary{cursor:pointer; padding:16px 20px; font-weight:800; font-family:"Fraunces",serif; font-size:1.05rem;
+  list-style:none; display:flex; align-items:center; justify-content:space-between; gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+"; font-family:"DM Mono",monospace; font-size:1.3rem; flex:none}
+details[open] summary{border-bottom:3px solid var(--line); background:var(--sun); color:var(--ink)}
+details[open] summary::after{content:"–"}
+.details-body{padding:20px}
+.draw-cols{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+.draw-cols h3{font-size:1.12rem; margin-bottom:12px; display:flex; align-items:center; gap:8px}
+.taglist{display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; list-style:none}
+.taglist li{font-size:.84rem; border:2px solid var(--line); border-radius:999px; padding:4px 11px}
+.taglist.yes li{background:var(--sun-pale)}
+.taglist.no li{background:var(--cream-deep); text-decoration:line-through; text-decoration-color:var(--berry);
+  text-decoration-thickness:2px; color:var(--cocoa-soft)}
+.adult-note{font-size:.84rem; color:var(--cocoa-soft); margin-top:14px; padding-top:14px; border-top:2px dotted var(--line)}
+
+/* ---------- contato ---------- */
+.links{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:14px}
+.linkcard{display:flex; align-items:center; gap:13px; text-decoration:none; background:var(--panel);
+  border:3px solid var(--line); border-radius:var(--r); padding:16px 18px; box-shadow:var(--shadow-sm);
+  transition:transform .12s ease}
+@media (hover:hover) and (pointer:fine){
+  .linkcard:hover{transform:translate(-2px,-2px); background:var(--sun); color:var(--ink)}
+  .price-card:hover{transform:translateY(-4px); box-shadow:8px 10px 0 rgba(62,42,34,.2)}
+  .gal figure:hover{transform:translateY(-4px) rotate(-.6deg)}
+  .step:hover{transform:translateY(-3px)}
+  .gal figure:hover .frame img,.gal figure:hover .frame video{transform:scale(1.045)}
+  .chipbtn:hover{transform:translateY(-1px)}
+}
+.price-card,.step{transition:transform .16s var(--ease-out), box-shadow .16s var(--ease-out)}
+.gal figure{transition:transform .18s var(--ease-out)}
+.gal .frame img,.gal .frame video{transition:transform .28s var(--ease-out)}
+.chipbtn{transition:background .14s ease, color .14s ease, transform .14s var(--ease-out)}
+.nav a{transition:background .14s ease, border-color .14s ease, color .14s ease}
+summary{transition:background .14s ease}
+.opt span{transition:background .14s ease, color .14s ease}
+.linkcard b{display:block; font-family:"Fraunces",serif; font-size:1.02rem}
+.linkcard span{font-family:"DM Mono",monospace; font-size:.78rem; color:var(--cocoa-soft)}
+.linkcard:hover span{color:var(--ink-soft)}
+
+footer.site{background:var(--cocoa); color:var(--cream); padding-block:40px 34px; border-bottom:0}
+footer.site .wrap{display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:space-between}
+footer.site a{color:var(--link-on-cocoa)}
+.foot-note{font-size:.84rem; opacity:.75; max-width:46ch}
+
+@media (max-width:900px){
+  .ych-card{grid-template-columns:1fr}
+  .ych-card .art{border-inline-end:0; border-bottom:3px solid var(--line)}
+  .hero .wrap{grid-template-columns:1fr; padding-block:40px 46px}
+  .hero-art{order:-1; justify-content:flex-start}
+  .about-grid,.tos-grid,.queue-wrap,.draw-cols{grid-template-columns:1fr}
+  .nav{width:100%; margin-inline-start:0; order:3}
+}
+@media (max-width:620px){
+  .fgrid{grid-template-columns:1fr}
+  .adm-row{grid-template-columns:1fr auto auto}
+  section{padding-block:48px}
+}

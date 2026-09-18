@@ -1,0 +1,73 @@
+SYK COMMISSIONS — site de comissões
+====================================
+
+COMO ABRIR
+- O SITE: dois cliques em "index.html". Abre direto, sem instalar nada.
+- O PAINEL: dois cliques em "servidor.cmd", depois abra
+  http://localhost:8080/admin.html
+  O painel PRECISA de servidor: ele lê o index.html para poder republicá-lo,
+  e o navegador bloqueia essa leitura quando a página é aberta por file://.
+  Abrindo o admin.html com dois cliques ele avisa e funciona pela metade
+  (pedidos e comissões sim; preços, galeria, YCH e textos não).
+- Use Chrome, Edge ou Firefox atualizados.
+
+ARQUIVOS
+  index.html        → o site (textos, seções, formulário)
+  admin.html        → o painel da artista, com login
+  css/style.css     → o visual do site
+  css/admin.css     → o visual do painel
+  js/core.js        → o que as duas páginas usam (carregue sempre primeiro)
+  js/site.js        → o comportamento do site
+  js/admin.js       → o comportamento do painel
+  assets/syk.webp   → a arte da fursona no topo
+  assets/honk.mp3   → o som do nariz
+  servidor.cmd      → sobe um servidor local na pasta
+
+SENHA DO PAINEL
+  Inicial: syk123 — troque na aba "vagas" do painel.
+  Ela é conferida dentro do navegador, então NÃO é segurança de verdade:
+  quem abre o código do site vê como funciona. Serve para manter curiosos
+  longe do painel. Nada crítico depende dela.
+
+ONDE MEXER NAS COISAS MAIS COMUNS
+- Cores: css/style.css, bloco ":root" logo no começo. Todas as cores do site
+  saem dali. Trocar --sun muda o amarelo no site inteiro.
+- Textos: index.html. Cada texto traduzido tem o português escrito normal e
+  o inglês no atributo data-en do mesmo elemento. Mude os dois.
+- Preços, vagas, galeria, YCH, termos: NÃO edite na mão. Use o painel ⚙
+  dentro do site — ele guarda tudo no bloco <script id="app-state"> do
+  index.html, e mexer ali na mão quebra fácil.
+- Posição do easter egg do nariz: css/style.css, regra "#nose", campos
+  left e top (em porcentagem da arte).
+- Velocidade das animações: css/style.css, os blocos "@keyframes sy-*".
+
+DOIS LUGARES ONDE OS DADOS FICAM
+1. O CONTEÚDO DO SITE (preços, vagas, galeria, YCH, textos) mora dentro do
+   index.html, no bloco <script id="app-state">. Vai junto quando publica,
+   então todo mundo vê.
+2. O ATELIÊ (pedidos, comissões, clientes, valores, prazos) fica salvo só no
+   navegador de quem usa o painel. NUNCA entra no arquivo publicado — é o que
+   impede nome de cliente de vazar no site. A fila que aparece no site é uma
+   versão anônima, só com posição, tipo e etapa.
+   >> Por isso: use "backup → exportar" no painel de vez em quando. Trocar de
+      navegador ou limpar os dados do site apaga o ateliê.
+
+COMO PUBLICAR O QUE VOCÊ MUDOU
+   Me mande uma mensagem dizendo "publica" e eu subo esta pasta para o mesmo
+   link, mantendo o endereço que já existe.
+
+   Não existe publicação automática: o site fica hospedado como Artifact da
+   Claude, e só a ferramenta de publicação escreve nele. Um arquivo na sua
+   máquina não consegue se publicar sozinho.
+
+   Se você quiser publicar sem depender de mim, dá para hospedar esta mesma
+   pasta em GitHub Pages, Netlify ou Cloudflare Pages — aí cada alteração
+   que você enviar vai ao ar sozinha. Muda o endereço do site, e eu te ajudo
+   a montar isso quando quiser.
+
+CUIDADOS
+- Mantenha a estrutura de pastas (css/, js/, assets/). Se mover um arquivo,
+  ajuste o caminho no index.html.
+- O arquivo publicado precisa caber em 16 MB no total. Hoje está em ~420 KB.
+- Ao trocar a arte da fursona, salve como .webp ou .jpg com uns 800px de
+  largura, para não pesar.

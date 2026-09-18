@@ -1,0 +1,6 @@
+# nada de dependências ou temporários no repositório
+node_modules/
+_tmp_img/
+*.log
+.DS_Store
+Thumbs.db

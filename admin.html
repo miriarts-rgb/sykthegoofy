@@ -1,0 +1,181 @@
+<meta charset="utf-8">
+<title>Painel da Syk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+<div class="adm-top">
+  <a class="adm-back" href="index.html">&larr; ver o site</a>
+  <strong>Painel da Syk</strong>
+  <span class="adm-who" id="adm-who"></span>
+  <button class="chipbtn" type="button" id="admin-logout">Sair</button>
+</div>
+
+<div class="adm-gate" id="gate">
+  <form class="login-box" id="login-form">
+    <h2>Painel da artista</h2>
+    <p>Digite sua senha para cuidar de pedidos, preços e galeria.</p>
+    <label for="login-pass">Senha</label>
+    <input type="password" id="login-pass" autocomplete="current-password">
+    <p class="login-err" id="login-err" hidden>Senha errada.</p>
+    <div class="login-acts">
+      <button type="submit" class="btn primary" id="login-go">Entrar</button>
+    </div>
+  </form>
+</div>
+
+<div id="adm-wrap" hidden>
+  <p class="adm-offline" id="adm-offline" hidden></p>
+<div id="admin" class="adm-page">
+  <div class="adm-head">
+    <h2>Painel da Syk</h2>
+    <div style="display:flex; gap:8px; align-items:center">
+      <span class="adm-who" id="adm-who"></span>
+      <button class="chipbtn" type="button" id="admin-logout">Sair</button>
+      <button class="chipbtn" type="button" id="admin-close">Fechar</button>
+    </div>
+  </div>
+  <div class="adm-tabs" id="adm-tabs" role="tablist">
+    <button type="button" role="tab" data-tab="pedidos" aria-selected="true">pedidos <span id="tab-badge" hidden></span></button>
+    <button type="button" role="tab" data-tab="studio" aria-selected="false">ateliê</button>
+    <button type="button" role="tab" data-tab="site" aria-selected="false">vagas</button>
+    <button type="button" role="tab" data-tab="precos" aria-selected="false">preços</button>
+    <button type="button" role="tab" data-tab="galeria" aria-selected="false">galeria</button>
+    <button type="button" role="tab" data-tab="ych" aria-selected="false">ych</button>
+    <button type="button" role="tab" data-tab="textos" aria-selected="false">textos</button>
+    <button type="button" role="tab" data-tab="backup" aria-selected="false">backup</button>
+  </div>
+  <div class="adm-body">
+
+    <div class="adm-pane" data-pane="pedidos">
+      <div class="adm-note" id="orders-note"></div>
+      <div style="display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px" id="orders-filter">
+        <button class="chipbtn" type="button" data-of="novo" aria-pressed="true">novos</button>
+        <button class="chipbtn" type="button" data-of="aceito" aria-pressed="false">aceitos</button>
+        <button class="chipbtn" type="button" data-of="recusado" aria-pressed="false">recusados</button>
+      </div>
+      <div class="kan" id="orders-list"></div>
+    </div>
+
+    <div class="adm-pane" data-pane="studio" hidden>
+      <div class="adm-note">
+        <b>Só você vê esta aba.</b> Nomes de clientes, valores e prazos ficam gravados neste navegador e
+        <b>nunca</b> entram na página publicada. O site mostra apenas a posição na fila, o tipo e a etapa.
+        Faça backup na aba <b>backup</b> de vez em quando.
+      </div>
+      <div class="kpis" id="adm-kpis"></div>
+      <div class="adm-sec">
+        <h3>Comissões</h3>
+        <div class="kan" id="adm-kan"></div>
+        <button class="chipbtn" type="button" id="adm-kan-add" style="margin-top:10px">+ nova comissão</button>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="site" hidden>
+      <div class="adm-sec">
+        <h3>Status e vagas</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <button class="chipbtn" type="button" id="adm-open-toggle">—</button>
+          <label style="text-transform:none; letter-spacing:0; font-family:Nunito; font-size:.9rem">
+            Vagas totais <input type="number" id="adm-slots" min="1" max="12" style="width:70px; display:inline-block; margin-inline-start:6px">
+          </label>
+        </div>
+        <p class="mini">Com as comissões abertas e todas as vagas ocupadas, o site mostra “vagas esgotadas” em vez de “fechadas”.</p>
+      </div>
+      <div class="adm-sec">
+        <h3>Senha do painel</h3>
+        <div class="adm-row" style="grid-template-columns:1fr 1fr auto">
+          <input type="password" id="adm-pass1" placeholder="nova senha" autocomplete="new-password" aria-label="Nova senha">
+          <input type="password" id="adm-pass2" placeholder="repita a senha" autocomplete="new-password" aria-label="Repita a senha">
+          <button class="chipbtn" type="button" id="adm-pass-save">trocar</button>
+        </div>
+        <p class="mini" id="adm-pass-msg">A senha vale depois de publicar. Ela protege contra curiosos, não é
+        segurança de verdade: quem abre o código do site consegue ver como ela é conferida. Nada crítico depende
+        dela — os dados do ateliê ficam só neste navegador.</p>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="precos" hidden>
+      <div class="adm-sec">
+        <h3>Preços</h3>
+        <div id="adm-prices"></div>
+        <p class="mini">Campo vazio faz o item aparecer como “a combinar”.</p>
+      </div>
+      <div class="adm-sec">
+        <h3>Acréscimos</h3>
+        <div id="adm-extras"></div>
+        <p class="mini">Percentuais somados sobre o preço base na calculadora do formulário.</p>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="galeria" hidden>
+      <div class="adm-sec">
+        <h3>Galeria</h3>
+        <div id="adm-gallery"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:center">
+          <label class="chipbtn" style="text-transform:none; letter-spacing:0">
+            + adicionar arquivo
+            <input type="file" id="adm-gal-file" accept="image/*,video/mp4,video/webm" multiple hidden>
+          </label>
+          <span class="mini" id="adm-gal-size"></span>
+        </div>
+        <p class="mini">Aceita imagem e vídeo curto (mp4/webm) para artes animadas. Os arquivos ficam embutidos na página, então use versões já redimensionadas: o site inteiro precisa caber em 16 MB.</p>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="ych" hidden>
+      <div class="adm-sec">
+        <h3>YCH do mês</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px">
+          <button class="chipbtn" type="button" id="adm-ych-toggle">—</button>
+          <span class="mini">Desligado, a seção some do site.</span>
+        </div>
+        <div id="adm-ych-fields"></div>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="textos" hidden>
+      <div class="adm-sec">
+        <h3>Termos de serviço</h3>
+        <p class="mini" style="margin:0 0 8px">Uma regra por linha.</p>
+        <textarea class="txt-edit" id="adm-tos"></textarea>
+      </div>
+      <div class="adm-sec">
+        <h3>Eu desenho / eu não desenho</h3>
+        <p class="mini" style="margin:0 0 8px">Um item por linha.</p>
+        <div class="fgrid">
+          <div class="field"><label>Eu desenho</label><textarea class="txt-edit" id="adm-yes"></textarea></div>
+          <div class="field"><label>Eu não desenho</label><textarea class="txt-edit" id="adm-no"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-pane" data-pane="backup" hidden>
+      <div class="adm-sec">
+        <h3>Backup</h3>
+        <p class="mini" style="margin:0 0 12px">Exporta tudo: conteúdo do site e os dados do ateliê. Guarde o arquivo em algum lugar seguro.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <button class="chipbtn" type="button" id="adm-export">Exportar para a área de transferência</button>
+          <label class="chipbtn" style="text-transform:none; letter-spacing:0">
+            Importar arquivo
+            <input type="file" id="adm-import" accept="application/json,.json" hidden>
+          </label>
+        </div>
+        <p class="mini" id="adm-backup-state"></p>
+        <textarea class="txt-edit" id="adm-backup-text" readonly hidden style="margin-top:12px"></textarea>
+      </div>
+    </div>
+
+  </div>
+  <div class="adm-foot">
+    <span class="adm-mode" id="adm-mode"></span>
+    <span class="savestate" id="adm-state"></span>
+    <button class="chipbtn" type="button" id="adm-revert">Descartar</button>
+    <button class="btn primary" type="button" id="adm-save">Publicar alterações</button>
+  </div>
+</div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/admin.js"></script>

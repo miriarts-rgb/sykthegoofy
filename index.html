@@ -1,0 +1,364 @@
+<meta charset="utf-8">
+<title>Syk Commissions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="css/style.css">
+
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="26" height="30" viewBox="0 0 24 28" aria-hidden="true">
+        <path d="M12 27C6.2 27 2 21.4 2 15.2 2 9.6 6.2 6.6 12 6.6s10 3 10 8.6C22 21.4 17.8 27 12 27z" fill="#D8352A" stroke="#3E2A22" stroke-width="1.7"/>
+        <path d="M12 7C9.6 3.8 6.4 3.2 3.6 4.4c.9 1.8 2.6 2.9 4.5 3-1.6.7-2.5 1.6-2.6 2.6 1.9.1 3.8-.6 5.3-1.8v-1.2z" fill="#6FA832" stroke="#3E2A22" stroke-width="1.4"/>
+        <path d="M12 7c2.4-3.2 5.6-3.8 8.4-2.6-.9 1.8-2.6 2.9-4.5 3 1.6.7 2.5 1.6 2.6 2.6-1.9.1-3.8-.6-5.3-1.8V7z" fill="#6FA832" stroke="#3E2A22" stroke-width="1.4"/>
+        <g fill="#F7D774"><ellipse cx="8" cy="13" rx="1" ry="1.5"/><ellipse cx="12" cy="11.4" rx="1" ry="1.5"/><ellipse cx="16" cy="13" rx="1" ry="1.5"/><ellipse cx="10" cy="17.4" rx="1" ry="1.5"/><ellipse cx="14" cy="17.4" rx="1" ry="1.5"/><ellipse cx="12" cy="21.6" rx="1" ry="1.5"/></g>
+      </svg>
+      Syk
+    </a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#precos" data-en="Prices">Preços</a>
+      <a href="#galeria" data-en="Gallery">Galeria</a>
+      <a href="#processo" data-en="How it works">Como funciona</a>
+      <a href="#ych">YCH</a>
+      <a href="#fila" data-en="Queue">Fila</a>
+      <a href="#termos" data-en="Terms">Termos</a>
+    </nav>
+    <a class="nav-order" href="#pedido" data-en="Order">Pedir</a>
+    <div class="tools">
+      <button class="chipbtn" id="lang-btn" type="button" aria-label="Trocar idioma">EN</button>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar" id="top">
+  <div class="wrap">
+    <span class="dot closed" id="status-dot"></span>
+    <strong id="status-text">Comissões fechadas no momento</strong>
+    <span id="status-detail" style="opacity:.8"></span>
+    <span class="mono" style="margin-inline-start:auto; font-size:.76rem; opacity:.7" id="status-updated"></span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1><em>syk</em>thegoofy</h1>
+      <p class="lede" data-en="&ldquo;I draw furry characters and I'm trying to make a living out of it. That's pretty much the dream.&rdquo;">“Desenho personagens furry e tento viver disso. Esse é basicamente o sonho.”</p>
+      <div class="cta-row">
+        <a class="btn primary" href="#pedido" data-en="Start an order">Fazer um pedido</a>
+        <a class="btn ghost" href="#precos" data-en="See prices">Ver preços</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="sona">
+        <button type="button" id="nose" aria-label="bip"></button>
+        <img id="sona-img" src="assets/syk.webp" alt="A fursona da Syk: um canídeo chibi de pelo marrom com cabelo vermelho em forma de morango, coleira com sino e patinhas rosa.">
+        <div class="sona-seal">
+          <span data-en="STARTING AT">A PARTIR DE</span>
+          <b class="mono" id="hero-price">R$40</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="mq-track" id="mq-track"></div>
+</div>
+
+<section class="cream" id="precos">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Commission prices">Preços das comissões</p>
+      <h2 data-en="Pick your size, pick your finish">Escolha o tamanho e o acabamento</h2>
+      <p data-en="Prices in US dollars and Brazilian reais. Payment through PayPal or Pix.">Preços em dólar e em real. Pagamento por PayPal ou Pix.</p>
+      <div style="display:flex; gap:8px; margin-top:18px">
+        <button class="chipbtn" type="button" data-cur="BRL" aria-pressed="true">R$ BRL</button>
+        <button class="chipbtn" type="button" data-cur="USD" aria-pressed="false">$ USD</button>
+      </div>
+    </div>
+    <div class="price-grid" id="price-grid"></div>
+  </div>
+</section>
+
+<section class="ground" id="galeria">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Gallery">Galeria</p>
+      <h2 data-en="Past work">Trabalhos anteriores</h2>
+      <p data-en="Filter by the kind of character. Everything shown here is safe for work.">Filtre pelo tipo de personagem. Tudo que aparece aqui é SFW.</p>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="gal" id="gal"></div>
+  </div>
+</section>
+
+<section class="cream" id="processo">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="How it works">Como funciona</p>
+      <h2 data-en="From first message to final file">Da primeira mensagem ao arquivo final</h2>
+      <p data-en="Five steps, in this order. The payment split is what keeps it fair for both sides.">Cinco etapas, nessa ordem. A divisão do pagamento é o que deixa justo pros dois lados.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h3 data-en="You reach out">Você chama</h3><p data-en="Send the form below or message me directly on Telegram or Discord with your references.">Manda o formulário abaixo ou fala comigo direto no Telegram ou Discord com suas referências.</p></div>
+      <div class="step"><div class="n">02</div><h3 data-en="We agree">A gente combina</h3><p data-en="Type, finish, price and a delivery window that works for both of us. I may decline a commission without giving a reason.">Tipo, acabamento, preço e um prazo que sirva pros dois. Posso recusar uma comissão sem dar motivo.</p></div>
+      <div class="step"><div class="n">03</div><h3 data-en="Half upfront">Metade adiantada</h3><p data-en="You pay 50% before I start the sketch — or the full amount, if you prefer.">Você paga 50% antes de eu começar o sketch — ou tudo, se preferir.</p></div>
+      <div class="step"><div class="n">04</div><h3 data-en="Sketch approval">Aprovação do sketch</h3><p data-en="I send the sketch for changes. Once it's approved, you pay the other 50%.">Eu mando o sketch para ajustes. Aprovado, você paga os outros 50%.</p></div>
+      <div class="step"><div class="n">05</div><h3 data-en="Final delivery">Entrega final</h3><p data-en="You get the finished file in full resolution. I may post it unless you asked for it to stay private.">Você recebe o arquivo final em resolução cheia. Posso postar, salvo se você pedir que fique privado.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="ground" id="ych">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="YCH of the month">YCH do mês</p>
+      <h2 id="ych-title">YCH do mês</h2>
+      <p data-en="A base I drew this month, at a lower price — you just send me your character.">Uma base que eu desenhei este mês, com preço menor. Você só me manda o seu personagem.</p>
+    </div>
+    <div class="ych-card">
+      <div class="art" id="ych-art"></div>
+      <div class="ych-body">
+        <div class="ych-title">
+          <h3 id="ych-name"></h3>
+          <span class="anim-tag" id="ych-tag" hidden>animado</span>
+        </div>
+        <p id="ych-desc" style="color:var(--cocoa-soft)"></p>
+        <div class="ych-meta">
+          <span class="ych-price" id="ych-price"></span>
+          <span class="usd-only" id="ych-usdonly" hidden></span>
+          <span class="pill wait" id="ych-slots"></span>
+        </div>
+        <div><a class="btn primary" href="#pedido" data-en="Claim a slot" style="margin-top:8px">Pegar uma vaga</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cream" id="fila">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Queue">Fila</p>
+      <h2 data-en="What I'm working on">No que estou trabalhando</h2>
+      <p data-en="Live status of every commission in progress, updated as each one moves along.">Status ao vivo de cada comissão em andamento, atualizado conforme cada uma avança.</p>
+    </div>
+    <div class="queue-wrap">
+      <div class="slots">
+        <h3 data-en="Open slots">Vagas abertas</h3>
+        <div class="slot-dots" id="slot-dots"></div>
+        <p id="slot-text"></p>
+      </div>
+      <div class="queue-list" id="queue-list"></div>
+    </div>
+  </div>
+</section>
+
+<section class="ground" id="pedido">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Order form">Formulário de pedido</p>
+      <h2 data-en="Tell me what you need">Me conta o que você quer</h2>
+      <p data-en="Fill it in once and choose how to send: straight through the site, or as a ready-made message for Telegram or Discord. Either way the estimate comes along.">Preencha uma vez e escolha como enviar: direto pelo site, ou como mensagem pronta para o Telegram ou Discord. De qualquer jeito o orçamento vai junto.</p>
+    </div>
+    <div class="form-card">
+      <form id="order-form">
+        <div class="fgrid">
+          <div class="field">
+            <label for="f-name" data-en="Your name / handle">Seu nome / @</label>
+            <input type="text" id="f-name" placeholder="@seuuser">
+          </div>
+          <div class="field">
+            <label for="f-contact" data-en="Where I reply">Onde eu respondo</label>
+            <select id="f-contact">
+              <option>Telegram</option><option>Discord</option><option>X / Twitter</option><option>Instagram</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-type" data-en="Commission type">Tipo de comissão</label>
+            <select id="f-type"></select>
+          </div>
+          <div class="field">
+            <label for="f-finish" data-en="Finish">Acabamento</label>
+            <select id="f-finish">
+              <option value="rendered">Rendered</option><option value="flat">Flat colour</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-rating" data-en="Rating">Classificação</label>
+            <select id="f-rating">
+              <option value="sfw">SFW</option><option value="nsfw">NSFW (+20%)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-cur" data-en="Currency">Moeda</label>
+            <select id="f-cur"><option value="BRL">R$ BRL</option><option value="USD">$ USD</option></select>
+          </div>
+          <div class="field full">
+            <label data-en="Background">Fundo</label>
+            <div class="opt-row" id="f-bg">
+              <label class="opt"><input type="radio" name="bg" value="none" checked><span data-en="No background">Sem fundo</span></label>
+              <label class="opt"><input type="radio" name="bg" value="simple"><span data-en="Simple">Simples</span></label>
+              <label class="opt"><input type="radio" name="bg" value="detailed"><span data-en="Detailed">Detalhado</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-chars" data-en="How many characters">Quantos personagens</label>
+            <select id="f-chars"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+          </div>
+          <div class="field">
+            <label for="f-deadline" data-en="Do you need it by a date?">Precisa até alguma data?</label>
+            <input type="date" id="f-deadline">
+          </div>
+          <div class="field full">
+            <label for="f-refs" data-en="Reference links">Links de referência</label>
+            <input type="text" id="f-refs" placeholder="Toyhouse, Google Drive, imgur...">
+          </div>
+          <div class="field full">
+            <label for="f-desc" data-en="What you'd like drawn">O que você quer que eu desenhe</label>
+            <textarea id="f-desc" placeholder="Pose, expressão, cenário, detalhes do personagem..."></textarea>
+          </div>
+        </div>
+        <div class="estimate" id="estimate"></div>
+        <!-- fica no DOM só para alimentar o copiar e o envio; não é exibido -->
+        <div class="summary-out" id="summary" hidden></div>
+        <div class="send-ways">
+          <div class="way">
+            <h3 data-en="Send through the site">Enviar pelo site</h3>
+            <p data-en="Drops straight into Syk's panel with the estimate attached.">Cai direto no painel da Syk com o orçamento junto.</p>
+            <button class="btn primary" type="button" id="send-btn" data-en="Send order">Enviar pedido</button>
+          </div>
+          <div class="way">
+            <h3 data-en="Send on social">Enviar pelas redes</h3>
+            <p data-en="Copies your order as a ready message, then opens the chat.">Copia seu pedido como mensagem pronta e abre a conversa.</p>
+            <div class="way-btns">
+              <button class="btn" type="button" id="copy-btn" data-en="Copy order">Copiar pedido</button>
+              <a class="btn ghost" id="tg-btn" href="https://t.me/AuauSyk" target="_blank" rel="noopener">Telegram</a>
+            </div>
+            <span class="copied" id="copied" hidden data-en="Copied!">Copiado!</span>
+          </div>
+        </div>
+        <div id="sent-box" hidden></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="cream" id="termos">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Terms of service">Termos de serviço</p>
+      <h2 data-en="By commissioning me, you agree to these">Ao me comissionar, você concorda com isto</h2>
+    </div>
+    <div class="tos-grid">
+      <ul class="rules">
+        <li data-en="Payment via PayPal or Pix only.">Pagamento somente por PayPal ou Pix.</li>
+        <li data-en="Half the value before the sketch and the other half after it — or full payment upfront, if you prefer.">Metade do valor antes do sketch e a outra metade depois — ou pagamento integral adiantado, se preferir.</li>
+        <li data-en="I don't work with deadlines that are too short, but your commission will be delivered. We can agree on a date if it works for both sides.">Não trabalho com prazos curtos demais, mas sua comissão será entregue. Podemos combinar uma data se servir pros dois lados.</li>
+        <li data-en="Refunds return only 50% if the sketch is already done. There are no refunds for finished art.">Reembolso devolve só 50% se o sketch já estiver pronto. Não há reembolso para arte finalizada.</li>
+        <li data-en="I have the right to decline a commission without specifying a reason.">Tenho o direito de recusar uma comissão sem especificar o motivo.</li>
+        <li data-en="I may post your commission on my social media — unless it's private, which you need to tell me during the process.">Posso postar sua comissão nas minhas redes — a menos que seja privada, o que você precisa me avisar durante o processo.</li>
+        <li data-en="You can't resell my artwork without my permission.">Você não pode revender minha arte sem a minha permissão.</li>
+      </ul>
+      <div>
+        <details>
+          <summary data-en="What I will and won't draw — full list">O que eu desenho e o que não desenho — lista completa</summary>
+          <div class="details-body">
+            <div class="draw-cols">
+              <div>
+                <h3 data-en="I will draw">Eu desenho</h3>
+                <ul class="taglist yes">
+                  <li>SFW</li><li>NSFW (+20%)</li><li>Furry</li><li data-en="Human / kemonomimi">Humano / kemonomimi</li>
+                  <li>Pokémon</li><li>Feral</li><li>Kemono</li><li>Yumeship</li><li>Gore</li><li>MLP</li>
+                </ul>
+                <p class="adult-note" data-en="Kinks: anything that isn't on the &ldquo;won't draw&rdquo; list is fine to ask about, and we discuss it.">Kinks: qualquer coisa que não esteja na lista do “não desenho” pode ser perguntada, e a gente conversa.</p>
+              </div>
+              <div>
+                <h3 data-en="I won't draw">Eu não desenho</h3>
+                <ul class="taglist no">
+                  <li data-en="Very muscular characters">Personagens muito musculosos</li>
+                  <li>Feral / cub NSFW</li>
+                  <li data-en="Crimes">Crimes</li>
+                  <li data-en="Knots / animal genitalia">Knots / genitália animal</li>
+                  <li>Scat / piss</li>
+                  <li>Vore</li>
+                  <li>Diapers / ABDL</li>
+                  <li>Inflation</li>
+                  <li data-en="Heavy gore NSFW">Gore pesado NSFW</li>
+                  <li data-en="NSFW containing my fursona">NSFW com a minha fursona</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </details>
+        <details>
+          <summary data-en="Frequently asked">Perguntas frequentes</summary>
+          <div class="details-body">
+            <p style="font-weight:700; margin-bottom:4px" data-en="Can I ask for changes?">Posso pedir alterações?</p>
+            <p style="font-size:.94rem; color:var(--cocoa-soft); margin-bottom:16px" data-en="Yes, the sketch stage is exactly for that. Bigger changes after the sketch is approved may affect the price.">Sim, a etapa do sketch existe exatamente pra isso. Mudanças grandes depois do sketch aprovado podem afetar o preço.</p>
+            <p style="font-weight:700; margin-bottom:4px" data-en="Do you draw more than one character?">Você desenha mais de um personagem?</p>
+            <p style="font-size:.94rem; color:var(--cocoa-soft); margin-bottom:16px" data-en="Yes. Each extra character is quoted on top of the base price. Ask me and I'll give you the total.">Sim. Cada personagem extra é orçado por cima do preço base. Me pergunte que eu passo o total.</p>
+            <p style="font-weight:700; margin-bottom:4px" data-en="Can I use it as my profile picture or in my toyhouse?">Posso usar como foto de perfil ou no meu toyhouse?</p>
+            <p style="font-size:.94rem; color:var(--cocoa-soft)" data-en="Of course, personal use is always fine. Just keep my signature and credit me. What you can't do is resell it.">Claro, uso pessoal é sempre liberado. Só mantenha minha assinatura e me credite. O que não pode é revender.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ground" id="contato">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-en="Contact">Contato</p>
+      <h2 data-en="Come say hi">Vem falar comigo</h2>
+      <p data-en="Telegram and Discord are the fastest ways to reach me about a commission.">Telegram e Discord são os jeitos mais rápidos de falar comigo sobre comissão.</p>
+    </div>
+    <div class="links">
+      <a class="linkcard" href="https://t.me/AuauSyk" target="_blank" rel="noopener"><div><b>Telegram</b><span>@AuauSyk</span></div></a>
+      <a class="linkcard" href="https://x.com/Sykthegoofy" target="_blank" rel="noopener"><div><b>X / Twitter</b><span>@Sykthegoofy</span></div></a>
+      <a class="linkcard" href="https://www.instagram.com/sykthegoofy/" target="_blank" rel="noopener"><div><b>Instagram</b><span>@sykthegoofy</span></div></a>
+      <a class="linkcard" href="https://www.tiktok.com/@sykthegoofy" target="_blank" rel="noopener"><div><b>TikTok</b><span>@sykthegoofy</span></div></a>
+      <a class="linkcard" href="#pedido"><div><b>Discord</b><span>@Auausyk</span></div></a>
+    </div>
+  </div>
+</section>
+
+
+<footer class="site">
+  <div class="wrap">
+    <div>
+      <p style="font-family:Fraunces,serif; font-weight:900; font-size:1.2rem">Syk</p>
+      <p class="foot-note" data-en="All artwork on this page belongs to Syk. Please don't repost without credit or resell it.">Toda a arte desta página pertence à Syk. Por favor não reposte sem crédito nem revenda.</p>
+    </div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:.9rem">
+      <a href="https://t.me/AuauSyk" target="_blank" rel="noopener">Telegram</a>
+      <a href="https://x.com/Sykthegoofy" target="_blank" rel="noopener">X</a>
+      <a href="https://www.instagram.com/sykthegoofy/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.tiktok.com/@sykthegoofy" target="_blank" rel="noopener">TikTok</a>
+      <a class="foot-admin" href="admin.html" data-en="Panel">Painel</a>
+    </div>
+  </div>
+</footer>
+
+
+
+<dialog id="lightbox">
+  <div class="lb-inner">
+    <div id="lb-media"></div>
+    <div class="lb-bar">
+      <strong id="lb-caption"></strong>
+      <button class="chipbtn" type="button" id="lb-close">Fechar</button>
+    </div>
+  </div>
+</dialog>
+
+
+<script id="app-state" type="application/json">{"open":false,"slotsTotal":5,"updated":"18 de set. de 2026","prices":[{"id":"icon","pt":"Headshot / Ícone","en":"Headshot / Icon","note_pt":"Só a cabeça, ótimo pra avatar","note_en":"Head only, great as an avatar","rendered":{"usd":40,"brl":60},"flat":{"usd":30,"brl":40}},{"id":"half","pt":"Half Body / Badge","en":"Half Body / Badge","note_pt":"Da cintura pra cima","note_en":"Waist up","rendered":{"usd":80,"brl":100},"flat":{"usd":70,"brl":80}},{"id":"full","pt":"Full Body","en":"Full Body","note_pt":"Corpo inteiro, pose livre","note_en":"Whole body, free pose","rendered":{"usd":110,"brl":150},"flat":{"usd":90,"brl":120}},{"id":"ref","pt":"Reference Sheet","en":"Reference Sheet","note_pt":"Folha de referência do personagem","note_en":"Character reference sheet","rendered":{"usd":null,"brl":null},"flat":{"usd":null,"brl":null}}],"queue":[],"gallery":[{"src":"assets/gallery/01.jpg","alt":"","tags":["full body"]},{"src":"assets/gallery/02.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/03.jpg","alt":"","tags":["halfbody"]},{"src":"assets/gallery/04.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/05.jpg","alt":"","tags":["full body"]},{"src":"assets/gallery/06.jpg","alt":"","tags":["half body"]},{"src":"assets/gallery/07.jpg","alt":"","tags":["full body"]},{"src":"assets/gallery/08.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/09.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/10.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/11.jpg","alt":"","tags":["reference sheet"]},{"src":"assets/gallery/12.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/13.jpg","alt":"","tags":["icon"]},{"src":"assets/gallery/14.jpg","alt":"","tags":["badge"]},{"src":"assets/gallery/15.jpg","alt":"","tags":["full body"]},{"src":"assets/gallery/16.jpg","alt":"","tags":["full body"]}],"extras":{"character":50,"bgSimple":15,"bgDetailed":40,"nsfw":20},"ych":{"active":true,"name_pt":"YCH animado","name_en":"Animated YCH","desc_pt":"Uma base animada que eu desenho uma vez por mês. Você me manda o personagem e eu encaixo nela: sai bem mais barato do que uma animação do zero, porque a animação já está pronta.","desc_en":"An animated base I draw once a month. You send me your character and I fit it in — far cheaper than an animation from scratch, because the animation is already done.","priceUsd":65,"usdOnly":true,"slots":3,"taken":0,"image":"","animated":true}}</script>
+
+<script src="js/core.js"></script>
+<script src="js/site.js"></script>
+

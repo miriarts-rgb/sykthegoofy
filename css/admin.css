@@ -1,0 +1,158 @@
+/* ---------- admin ---------- */
+/* entrada do painel: discreta no rodapé, como um link a mais */
+.foot-admin{
+  background:none; border:0; padding:0; cursor:pointer;
+  font-family:inherit; font-size:.9rem; color:var(--link-on-cocoa);
+  text-decoration:underline; text-underline-offset:3px;
+}
+.foot-admin:hover{color:var(--cream)}
+
+dialog#login{
+  border:3px solid var(--line); border-radius:20px;
+  background:var(--ground); color:var(--cocoa);
+  padding:0; width:min(400px,92vw);
+}
+dialog#login::backdrop{background:rgba(20,13,10,.72)}
+.login-box{display:flex; flex-direction:column; gap:10px; padding:26px 28px; color:var(--cocoa)}
+.login-box h2{font-size:1.35rem}
+.login-box p{font-size:.9rem; color:var(--cocoa-soft)}
+.login-box label{margin-top:6px}
+.login-err{color:var(--stop); font-weight:700; font-size:.86rem}
+.login-acts{display:flex; gap:10px; justify-content:flex-end; margin-top:14px; align-items:center}
+.adm-who{font-family:"DM Mono",monospace; font-size:.72rem; color:var(--cocoa-soft)}
+.adm-page{
+  border:3px solid var(--line); border-radius:var(--r); background:var(--ground);
+  color:var(--cocoa); max-width:var(--maxw); margin:22px auto 40px; overflow:hidden;
+}
+.adm-head{position:sticky; top:0; background:var(--cream); border-bottom:3px solid var(--line);
+  padding:16px 22px; display:flex; align-items:center; gap:12px; justify-content:space-between; z-index:2}
+.adm-head h2{font-size:1.2rem}
+.adm-body{padding:22px; display:grid; gap:22px; overflow:auto}
+.adm-sec{border:2px solid var(--line); border-radius:14px; padding:18px; background:var(--panel)}
+.adm-sec>h3{font-size:1rem; margin-bottom:14px}
+.adm-row{display:grid; grid-template-columns:1fr auto auto auto; gap:10px; align-items:center; margin-bottom:9px}
+.adm-row input[type="text"]{min-width:0}
+.mini{font-size:.78rem; color:var(--cocoa-soft); margin-top:10px}
+.adm-foot{position:sticky; bottom:0; background:var(--cream); border-top:3px solid var(--line);
+  padding:14px 22px; display:flex; gap:12px; align-items:center; justify-content:flex-end}
+.savestate{margin-inline-end:auto; font-size:.85rem; font-weight:700}
+.iconbtn{border:2px solid var(--line); background:var(--panel); color:var(--cocoa); cursor:pointer;
+  border-radius:9px; width:34px; height:34px; display:grid; place-items:center; font-size:1rem}
+.iconbtn:hover{background:var(--berry-solid); color:#fff}
+
+/* ---------- YCH ---------- */
+.ych-card{display:grid; grid-template-columns:minmax(0,320px) 1fr; gap:0; background:var(--panel);
+  border:3px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden}
+.ych-card .art{aspect-ratio:1/1; max-width:100%; background:var(--sun-pale); border-inline-end:3px solid var(--line);
+  display:grid; place-items:center; overflow:hidden}
+.ych-card .art img{width:100%; height:100%; object-fit:cover}
+.ych-body{padding:26px 28px; display:flex; flex-direction:column; gap:12px; justify-content:center}
+.ych-body h3{font-size:1.6rem}
+.ych-meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px}
+.ych-price{font-family:"DM Mono",monospace; font-size:1.7rem; font-weight:500; color:var(--berry-text)}
+.ych-title{display:flex; align-items:center; gap:11px; flex-wrap:wrap}
+.usd-only{font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.06em;
+  color:var(--cocoa-soft); align-self:center}
+/* selo de "animado": pisca de leve, dizendo que a base tem movimento */
+.anim-tag{font-family:"DM Mono",monospace; font-size:.74rem; letter-spacing:.08em;
+  text-transform:uppercase; background:var(--leaf); color:var(--ink);
+  border:2px solid var(--line); border-radius:999px; padding:3px 10px;
+  animation:sy-anim-tag 2.6s ease-in-out infinite}
+@keyframes sy-anim-tag{0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-3px) rotate(2deg)}}
+.ych-empty{display:grid; place-items:center; gap:8px; text-align:center; color:var(--ink-soft)}
+.ych-empty span{font-size:2.2rem; line-height:1}
+.ych-empty p{font-family:"DM Mono",monospace; font-size:.78rem; letter-spacing:.06em}
+/* a moldura do YCH respira, sinalizando que ali tem movimento */
+.ych-card .art{animation:sy-ych 7s ease-in-out infinite}
+@keyframes sy-ych{0%,100%{background-position:0% 50%} 50%{background-position:100% 50%}}
+.ych-card .art{background:linear-gradient(115deg,var(--sun-pale),var(--cream-deep),var(--sun-pale));
+  background-size:220% 220%}
+@media (prefers-reduced-motion:reduce){
+  .anim-tag,.ych-card .art{animation:none !important}
+}
+
+/* ---------- orçamento ao vivo ---------- */
+.estimate{background:var(--cream); border:2px solid var(--line); border-radius:14px; padding:18px 20px; margin-top:18px}
+.est-line{display:flex; justify-content:space-between; gap:12px; padding:7px 0; font-size:.92rem;
+  border-bottom:1px dotted var(--line)}
+.est-line small{font-family:"DM Mono",monospace; font-size:.74rem; color:var(--cocoa-soft)}
+.est-total{display:flex; justify-content:space-between; gap:12px; padding-top:12px; margin-top:6px;
+  border-top:2px solid var(--line); align-items:baseline}
+.est-total strong{font-family:"DM Mono",monospace; font-size:1.5rem; color:var(--berry-text)}
+.est-foot{font-size:.8rem; color:var(--cocoa-soft); margin-top:10px}
+.opt-row{display:flex; gap:8px; flex-wrap:wrap}
+.opt{cursor:pointer; position:relative}
+.opt input{position:absolute; opacity:0; width:0; height:0}
+.opt span{display:inline-block; border:2px solid var(--line); border-radius:999px; padding:7px 14px;
+  font-size:.86rem; font-weight:600; background:var(--ground)}
+.opt input:checked+span{background:var(--sun); color:var(--ink)}
+.opt input:focus-visible+span{outline:3px solid var(--berry); outline-offset:2px}
+
+/* ---------- lightbox ---------- */
+dialog#lightbox{border:0; background:transparent; padding:0; max-width:96vw; max-height:92vh; overflow:visible}
+dialog#lightbox::backdrop{background:rgba(30,20,16,.82)}
+.lb-inner{background:var(--panel); border:3px solid var(--line); border-radius:var(--r); overflow:hidden;
+  box-shadow:var(--shadow)}
+.lb-inner img,.lb-inner video{display:block; max-width:88vw; max-height:74vh; width:auto; height:auto}
+.lb-bar{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  padding:12px 16px; border-top:3px solid var(--line); background:var(--cream)}
+.play-badge{position:absolute; left:8px; top:8px; font-family:"DM Mono",monospace; font-size:.64rem;
+  letter-spacing:.06em; background:var(--cocoa); color:var(--ground); border-radius:999px; padding:3px 9px}
+.gal figure button.open{all:unset; cursor:zoom-in; display:block; width:100%}
+
+/* ---------- painel: abas e KPIs ---------- */
+.adm-tabs{display:flex; gap:6px; flex-wrap:wrap; padding:14px 22px 0; background:var(--cream)}
+.adm-tabs button{font-family:"DM Mono",monospace; font-size:.76rem; cursor:pointer; padding:8px 13px;
+  border:2px solid var(--line); border-bottom:0; border-radius:11px 11px 0 0; background:var(--panel); color:var(--cocoa)}
+.adm-tabs button[aria-selected="true"]{background:var(--sun); color:var(--ink); font-weight:500}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:18px}
+.kpi{background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:14px 16px}
+.kpi b{display:block; font-family:"DM Mono",monospace; font-size:1.5rem; line-height:1.1}
+.kpi span{font-size:.78rem; color:var(--cocoa-soft)}
+.kpi.alert{background:var(--berry-solid); color:#fff; border-color:var(--line)}
+.kpi.alert span{color:rgba(255,255,255,.85)}
+.kan{display:grid; gap:10px}
+.kan-card{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:start;
+  background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:14px 16px}
+.kan-card.late{border-color:var(--berry-solid); border-width:3px}
+.kan-card .top{display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:7px}
+.kan-card .who{font-weight:800}
+.kan-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(122px,1fr)); gap:8px; margin-top:10px}
+.kan-grid input,.kan-grid select{font-size:.85rem; padding:8px 10px}
+.paid-no{background:var(--cream-deep)} .paid-half{background:var(--sun)} .paid-full{background:var(--leaf)}
+.late-flag{font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
+  background:var(--berry-solid); color:#fff; border-radius:999px; padding:3px 9px}
+.adm-note{background:var(--sun-pale); border:2px solid var(--line); border-radius:12px; padding:12px 14px;
+  font-size:.84rem; margin-bottom:16px}
+.txt-edit{width:100%; min-height:150px; font-family:"DM Mono",monospace; font-size:.82rem; line-height:1.6}
+
+
+/* ---------- painel como página ---------- */
+body{min-height:100%}
+.adm-top{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  background:var(--cream); color:var(--cocoa); border-bottom:3px solid var(--line);
+  padding:12px 22px;
+}
+.adm-top strong{font-family:"Fraunces",serif; font-size:1.1rem}
+.adm-top .adm-who{margin-inline-start:auto}
+.adm-back{font-size:.88rem; text-decoration:none; font-weight:700; color:var(--link-on-cocoa)}
+.adm-back:hover{text-decoration:underline}
+
+.adm-gate{display:grid; place-items:center; padding:60px 20px}
+.adm-gate .login-box{
+  background:var(--panel); border:3px solid var(--line); border-radius:20px;
+  box-shadow:var(--shadow); width:min(400px,100%);
+}
+
+.adm-offline{
+  max-width:var(--maxw); margin:18px auto 0; padding:14px 18px;
+  background:var(--sun-pale); color:var(--cocoa);
+  border:2px solid var(--line); border-radius:14px; font-size:.88rem;
+}
+.adm-page .adm-body{max-height:none; overflow:visible}
+.adm-page .adm-head{position:sticky; top:0}
+.adm-page .adm-foot{position:sticky; bottom:0; flex-wrap:wrap}
+.adm-mode{font-size:.8rem; color:var(--cocoa-soft); flex:1 1 220px; min-width:0}
+@media (max-width:620px){ .adm-top{padding:10px 16px} .adm-page{margin-inline:12px} }
