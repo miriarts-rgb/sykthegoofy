@@ -114,7 +114,21 @@ window.SykDB = (function(){
     return sb.storage.from(BUCKET)
       .upload(name, blob, {cacheControl:"31536000", upsert:false})
       .then(function(r){
-        if(r.error) throw r.error;
+        if(r.error){
+          /* o Supabase devolve mensagens que não dizem o que houve
+             ("statement timeout" quando o balde nem existe): traduz para
+             algo que aponte o que fazer */
+          var m = (r.error.message || "") + " " + (r.error.error || "");
+          if(/not found|NoSuchBucket|timeout/i.test(m))
+            throw new Error("o armazenamento não está criado — rode o supabase/storage.sql");
+          if(/exceeded the maximum allowed size|payload too large/i.test(m))
+            throw new Error("arquivo grande demais (máx. 8 MB)");
+          if(/mime type|not allowed/i.test(m))
+            throw new Error("tipo de arquivo não aceito — use imagem ou mp4/webm");
+          if(/row-level security|Unauthorized|401/i.test(m))
+            throw new Error("sem permissão para enviar: refaça o login");
+          throw r.error;
+        }
         var pub = sb.storage.from(BUCKET).getPublicUrl(name);
         return {path:name, url:pub.data.publicUrl};
       });
