@@ -713,7 +713,8 @@
       layer.className = "seedfall"; layer.setAttribute("aria-hidden","true");
 
       var altura = sec.offsetHeight || 600;
-      var quantas = Math.max(22, Math.min(70, Math.round(altura / 34)));
+      /* subiu um pouco para cobrir a textura fixa que saiu */
+      var quantas = Math.max(28, Math.min(84, Math.round(altura / 28)));
 
       for(var i = 0; i < quantas; i++){
         var s = document.createElement("i");

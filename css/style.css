@@ -112,23 +112,9 @@ img{max-width:100%}
 }
 section{position:relative}
 section > .wrap{position:relative; z-index:1}
-/* textura fixa de sementinhas, a mesma ideia do hero. No fundo escuro
-   ela precisa ser bem mais discreta, senão vira chuvisco. */
-section.cream::before,
-section.ground::before{
-  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  opacity:.5;
-  background-image:
-    radial-gradient(ellipse 2px 3px at 11% 17%, var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 74% 9%,  var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 29% 61%, var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 57% 44%, var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 88% 72%, var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 41% 88%, var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 6% 79%,  var(--seed) 60%, transparent 61%),
-    radial-gradient(ellipse 2px 3px at 66% 27%, var(--seed) 60%, transparent 61%);
-  background-size:300px 240px;
-}
+/* Nada de textura fixa aqui: os pontinhos parados de 2px pareciam
+   sujeira na tela, misturados com as sementes animadas. Nas faixas
+   fica só o seedfall, todas do mesmo tamanho e em movimento. */
 
 @media (prefers-reduced-motion:reduce){
   /* mais suave, não zero: mantém o que ajuda a entender, corta o deslocamento */
