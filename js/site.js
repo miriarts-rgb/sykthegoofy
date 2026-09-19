@@ -21,6 +21,12 @@
       if(!el.hasAttribute("data-pt")) el.setAttribute("data-pt", el.innerHTML);
       el.innerHTML = el.getAttribute(lang === "en" ? "data-en" : "data-pt");
     });
+    /* texto de exemplo dos campos: é atributo, não conteúdo, então
+       precisa da própria troca — senão o site em inglês pede "@seuuser" */
+    $$("[data-ph-en]").forEach(function(el){
+      if(!el.hasAttribute("data-ph-pt")) el.setAttribute("data-ph-pt", el.placeholder || "");
+      el.placeholder = el.getAttribute(lang === "en" ? "data-ph-en" : "data-ph-pt") || "";
+    });
     $("#lang-btn").textContent = lang === "en" ? "PT" : "EN";
     document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
     renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderStatus(); renderFilters(); renderGallery();

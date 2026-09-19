@@ -569,49 +569,33 @@ footer.site a{color:var(--link-on-cocoa)}
   font-size:.8rem; color:var(--cocoa-soft); margin-top:12px;
   padding-top:10px; border-top:1px dotted var(--line);
 }
-/* Escolha de fundo: cartões com uma miniatura desenhada do que cada
-   opção significa, em vez de três bolinhas de rádio. O desenho é feito
-   em CSS puro — nada de imagem a carregar. */
-.opt-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
-.opt{cursor:pointer; position:relative; display:block; text-transform:none; letter-spacing:0}
+/* Escolha de fundo: só os rótulos. Uma marca circular à esquerda dá o
+   sinal de "escolhido" sem precisar do círculo cru do navegador. */
+.opt-row{display:flex; flex-wrap:wrap; gap:9px}
+.opt{cursor:pointer; position:relative; text-transform:none; letter-spacing:0}
 .opt input{position:absolute; opacity:0; width:0; height:0}
 .opt span{
-  display:flex; flex-direction:column; align-items:center; gap:9px;
-  border:2px solid var(--line); border-radius:14px; padding:13px 10px 11px;
-  font-size:.84rem; font-weight:700; background:var(--ground); color:var(--cocoa);
-  text-align:center; line-height:1.25;
+  display:inline-flex; align-items:center; gap:9px;
+  border:2px solid var(--line); border-radius:999px; padding:9px 17px 9px 13px;
+  font-size:.88rem; font-weight:700; background:var(--ground); color:var(--cocoa);
+  line-height:1.2; white-space:nowrap;
   transition:border-color .16s var(--ease-out), background .16s var(--ease-out),
-             transform .16s var(--ease-out);
+             color .16s var(--ease-out);
 }
-/* a miniatura: um quadradinho que representa o fundo da arte */
 .opt span::before{
-  content:""; width:100%; aspect-ratio:4/3; border-radius:8px;
-  border:2px solid var(--line); background:var(--cream-deep);
-}
-.opt:nth-child(2) span::before{
-  background:linear-gradient(140deg, var(--sun-pale), var(--cream-deep));
-}
-.opt:nth-child(3) span::before{
-  background:
-    radial-gradient(circle at 26% 68%, var(--leaf-deep) 0 14%, transparent 15%),
-    radial-gradient(circle at 62% 74%, var(--leaf-deep) 0 11%, transparent 12%),
-    radial-gradient(circle at 80% 30%, var(--seed) 0 8%, transparent 9%),
-    linear-gradient(160deg, var(--sun-pale), var(--berry-deep));
+  content:""; width:13px; height:13px; flex:none; border-radius:50%;
+  border:2px solid var(--cocoa-soft); background:transparent;
+  transition:border-color .16s var(--ease-out), box-shadow .16s var(--ease-out);
 }
 @media (hover:hover) and (pointer:fine){
-  .opt:hover span{border-color:var(--cocoa-soft); transform:translateY(-2px)}
+  .opt:hover span{border-color:var(--cocoa-soft)}
 }
-.opt input:checked + span{
-  background:var(--sun); color:var(--ink); border-color:var(--ink);
-  box-shadow:var(--shadow-sm);
+.opt input:checked + span{background:var(--sun); color:var(--ink); border-color:var(--ink)}
+/* o miolo da marca é feito com sombra interna: nada de elemento extra */
+.opt input:checked + span::before{
+  border-color:var(--ink); box-shadow:inset 0 0 0 3px var(--ink);
 }
-.opt input:checked + span::before{border-color:var(--ink)}
 .opt input:focus-visible + span{outline:3px solid var(--berry); outline-offset:3px}
-@media (max-width:520px){
-  .opt-row{grid-template-columns:1fr}
-  .opt span{flex-direction:row; align-items:center; gap:12px; text-align:left; padding:10px 12px}
-  .opt span::before{width:56px; flex:none; aspect-ratio:4/3}
-}
 
 /* ---------- lightbox ---------- */
 dialog#lightbox{border:0; background:transparent; padding:0; max-width:96vw; max-height:92vh; overflow:visible}
