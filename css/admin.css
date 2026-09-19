@@ -112,3 +112,8 @@ body{min-height:100%}
 .tag-chip[aria-pressed="true"]{background:var(--sun); color:var(--ink); border-color:var(--line); font-weight:500}
 .adm-row:has(.tag-pick){align-items:start}
 @media (max-width:620px){ .adm-top{padding:10px 16px} .adm-page{margin-inline:12px} }
+
+/* posição na fila — o número que o visitante vê, aqui com nome do lado */
+.fila-pos{font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.04em;
+  background:var(--sun); color:var(--ink); border:2px solid var(--line);
+  border-radius:999px; padding:2px 9px; white-space:nowrap}

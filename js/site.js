@@ -159,7 +159,14 @@
   /* ---------- fila ---------- */
   function typeName(id){
     var p = (S().prices||[]).filter(function(x){ return x.id === id; })[0];
-    return p ? pick(p,"pt","en") : (lang==="en" ? "Commission" : "Comissão");
+    if(p) return pick(p,"pt","en");
+    /* o YCH não está na tabela de preços: sem isto, a fila mostraria
+       "Comissão" genérico para uma vaga do mês */
+    if(id === "ych"){
+      var y = S().ych || {};
+      return pick(y,"name_pt","name_en") || (lang==="en" ? "YCH of the month" : "YCH do mês");
+    }
+    return lang==="en" ? "Commission" : "Comissão";
   }
   function renderQueue(){
     var box = $("#queue-list"); if(!box) return;

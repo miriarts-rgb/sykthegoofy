@@ -251,6 +251,7 @@
               return DB.addCommission({
                 who:o.who, type:o.type, stage:"wait", paid:"no",
                 value:o.estimate != null ? o.estimate : null,
+                cur:o.cur === "USD" ? "USD" : "BRL",
                 deadline:o.deadline || null
               });
             })
@@ -301,16 +302,26 @@
     };
   }
   function renderStudio(){
-    var m = C.metrics(), kb = $("#adm-kpis");
-    kb.innerHTML =
-      '<div class="kpi"><b>' + m.active + '</b><span>em andamento</span></div>' +
-      '<div class="kpi"><b>R$' + m.earned + '</b><span>já recebido</span></div>' +
-      '<div class="kpi"><b>R$' + m.due + '</b><span>a receber</span></div>' +
-      (m.late ? '<div class="kpi alert"><b>' + m.late + '</b><span>atrasada(s)</span></div>'
-              : '<div class="kpi"><b>0</b><span>atrasadas</span></div>');
+    var m = C.metrics(commissions), kb = $("#adm-kpis");
+    var html = '<div class="kpi"><b>' + m.active + '</b><span>em andamento</span></div>';
+    /* uma dupla de cartões por moeda, e só das moedas em uso: quem
+       nunca cobrou em dólar não precisa ver dois zeros a mais */
+    [["BRL","R$"],["USD","$"]].forEach(function(par){
+      var d = m[par[0]];
+      if(!d.n && par[0] === "USD") return;
+      html += '<div class="kpi"><b>' + par[1] + d.earned + '</b><span>já recebido</span></div>' +
+              '<div class="kpi"><b>' + par[1] + d.due + '</b><span>a receber</span></div>';
+    });
+    html += (m.late ? '<div class="kpi alert"><b>' + m.late + '</b><span>atrasada(s)</span></div>'
+                    : '<div class="kpi"><b>0</b><span>atrasadas</span></div>');
+    kb.innerHTML = html;
 
     var box = $("#adm-kan"); box.innerHTML = "";
     var cs = commissions;
+    /* a mesma contagem que o site faz: só o que não foi entregue ocupa
+       lugar. Aqui a posição vem acompanhada do nome — no site, não. */
+    var pos = 0, posDe = {};
+    cs.forEach(function(c){ if(c.stage !== "done") posDe[c.id] = ++pos; });
     if(!cs.length){
       box.innerHTML = '<p class="mini">Nenhuma comissão registrada. Clique em “nova comissão” quando fechar um trabalho.</p>';
       return;
@@ -320,7 +331,9 @@
       card.className = "kan-card" + (C.isLate(c) ? " late" : "");
       card.innerHTML =
         '<div style="min-width:0">' +
-          '<div class="top"><span class="who"></span>' +
+          '<div class="top">' +
+            (posDe[c.id] ? '<span class="fila-pos">' + posDe[c.id] + 'º na fila</span>' : '') +
+            '<span class="who"></span>' +
             '<span class="pill ' + (c.stage||"wait") + '"></span>' +
             '<span class="pill paid-' + (c.paid||"no") + '"></span>' +
             (C.isLate(c) ? '<span class="late-flag">atrasada</span>' : '') +
@@ -332,7 +345,8 @@
               '<option value="color">pintando</option><option value="done">entregue</option></select>' +
             '<select aria-label="Pagamento"><option value="no">não pago</option><option value="half">50% pago</option>' +
               '<option value="full">pago</option></select>' +
-            '<input type="number" placeholder="valor R$" aria-label="Valor">' +
+            '<select aria-label="Moeda"><option value="BRL">R$ real</option><option value="USD">$ dólar</option></select>' +
+            '<input type="number" placeholder="valor" aria-label="Valor">' +
             '<input type="date" aria-label="Prazo">' +
           '</div>' +
         '</div>' +
@@ -343,22 +357,43 @@
       card.querySelector(".pill.paid-" + (c.paid||"no")).textContent = C.PAIDLBL[c.paid||"no"];
 
       var ins = card.querySelectorAll("input"), sels = card.querySelectorAll("select");
-      var typeSel = sels[0];
+      var typeSel = sels[0], moedaSel = sels[3];
       (S().prices||[]).forEach(function(p){
         var o = document.createElement("option"); o.value = p.id; o.textContent = p.pt; typeSel.appendChild(o);
       });
+      /* o YCH também é comissão: sem ele aqui, uma vaga do mês não tinha
+         como ser registrada com o tipo certo */
+      var y = S().ych || {};
+      if(y.active || c.type === "ych"){
+        var oy = document.createElement("option");
+        oy.value = "ych";
+        oy.textContent = y.name_pt || y.name_en || "YCH do mês";
+        typeSel.appendChild(oy);
+      }
       ins[0].value = c.who || ""; typeSel.value = c.type || "";
       sels[1].value = c.stage || "wait"; sels[2].value = c.paid || "no";
+      moedaSel.value = c.cur || "BRL";
       ins[1].value = c.value != null ? c.value : ""; ins[2].value = c.deadline || "";
+      ins[1].placeholder = "valor " + (moedaSel.value === "USD" ? "$" : "R$");
 
       var setWho = debounced(c, "who"), setValue = debounced(c, "value");
       ins[0].addEventListener("input", function(){ setWho(ins[0].value); });
       ins[1].addEventListener("input", function(){
         setValue(ins[1].value === "" ? null : +ins[1].value);
       });
-      typeSel.addEventListener("change", function(){ saveField(c, {type:typeSel.value}); renderStudio(); });
+      typeSel.addEventListener("change", function(){
+        /* escolher YCH já traz o preço do mês, que é fechado em dólar */
+        var patch = {type:typeSel.value};
+        var ych = S().ych || {};
+        if(typeSel.value === "ych" && ych.priceUsd != null && c.value == null){
+          patch.value = ych.priceUsd;
+          patch.cur = "USD";
+        }
+        saveField(c, patch); renderStudio();
+      });
       sels[1].addEventListener("change", function(){ saveField(c, {stage:sels[1].value}); renderStudio(); });
       sels[2].addEventListener("change", function(){ saveField(c, {paid:sels[2].value}); renderStudio(); });
+      moedaSel.addEventListener("change", function(){ saveField(c, {cur:moedaSel.value}); renderStudio(); });
       ins[2].addEventListener("change", function(){
         saveField(c, {deadline:ins[2].value || null}); renderStudio();
       });
@@ -373,7 +408,7 @@
   $("#adm-kan-add").addEventListener("click", function(){
     var first = (S().prices||[])[0];
     DB.addCommission({who:"", type:first?first.id:"", stage:"wait", paid:"no",
-                      value:null, deadline:null})
+                      value:null, cur:"BRL", deadline:null})
       .then(function(c){ commissions.push(c); renderStudio(); })
       .catch(showErr);
   });

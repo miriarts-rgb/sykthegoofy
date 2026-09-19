@@ -75,17 +75,28 @@ window.SykCore = (function(){
     var t = new Date(c.deadline + "T00:00:00").getTime();
     return !isNaN(t) && t < new Date().setHours(0,0,0,0);
   }
-  function metrics(){
-    var m = {active:0, late:0, earned:0, due:0};
-    Studio.d.commissions.forEach(function(c){
+  /* Totais separados por moeda: somar dólar com real daria um número que
+     não existe. Cada moeda tem o próprio recebido e a receber. */
+  function metrics(lista){
+    var cs = lista || Studio.d.commissions || [];
+    var m = {active:0, late:0,
+             BRL:{earned:0, due:0, n:0},
+             USD:{earned:0, due:0, n:0}};
+    cs.forEach(function(c){
       var v = +c.value || 0;
+      var moeda = c.cur === "USD" ? "USD" : "BRL";
       if(c.stage !== "done") m.active++;
-      if(c.paid === "full") m.earned += v;
-      else if(c.paid === "half"){ m.earned += v/2; m.due += v/2; }
-      else m.due += v;
       if(isLate(c)) m.late++;
+      if(!v) return;
+      m[moeda].n++;
+      if(c.paid === "full") m[moeda].earned += v;
+      else if(c.paid === "half"){ m[moeda].earned += v/2; m[moeda].due += v/2; }
+      else m[moeda].due += v;
     });
-    m.earned = Math.round(m.earned); m.due = Math.round(m.due);
+    ["BRL","USD"].forEach(function(k){
+      m[k].earned = Math.round(m[k].earned);
+      m[k].due    = Math.round(m[k].due);
+    });
     return m;
   }
   /* a fila que vai ao ar: posição, tipo e etapa, nunca o cliente */
