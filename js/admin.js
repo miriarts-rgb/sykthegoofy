@@ -16,7 +16,7 @@
   var $ = C.$, $$ = C.$$, STAGES = C.STAGES;
   var DB = window.SykDB;
 
-  var state = null, draft = null;
+  var state = null, draft = null, needsFirstSave = false;
   function S(){ return draft || state || {}; }
   function startDraft(){ if(!draft) draft = C.clone(state || {}); }
   function markDirty(){ $("#adm-state").textContent = "alterações não salvas"; }
@@ -39,6 +39,14 @@
     });
     var hint = $("#adm-mode");
     if(hint) hint.textContent = "Salvar grava no banco: o site mostra na hora, para todo mundo.";
+    if(needsFirstSave){
+      $("#adm-state").textContent = "primeira vez: confira e clique em Salvar no site";
+      var w = $("#adm-offline");
+      w.hidden = false;
+      w.innerHTML = "<b>Faltou gravar o conteúdo no banco.</b> Carreguei aqui o que o site já mostra " +
+        "(preços, artes, YCH e textos). Confira e clique em <b>Salvar no site</b> uma vez — " +
+        "a partir daí o painel passa a comandar o site.";
+    }
     renderAdmin();
   }
   $("#login-form").addEventListener("submit", function(e){
@@ -70,12 +78,34 @@
      localhost, pelo site publicado ou pelo celular. */
   var orders = [], commissions = [];
 
+  /* Banco vazio (primeira vez) não pode significar painel vazio: sem nada
+     para ver, não haveria como salvar e sair do zero. Nesse caso o painel
+     pega o conteúdo de reserva que vem dentro do index.html e já abre com
+     ele pronto para gravar. */
+  function seedFromSite(){
+    return fetch("index.html", {cache:"no-store"})
+      .then(function(r){ return r.text(); })
+      .then(function(txt){
+        var doc = new DOMParser().parseFromString(txt, "text/html");
+        return C.readState(doc) || {};
+      })
+      .catch(function(){ return {}; });
+  }
+
   function loadAll(){
     return Promise.all([DB.loadContent(), DB.listOrders(), DB.listCommissions()])
       .then(function(r){
-        state = r[0] || {};
         orders = r[1] || [];
         commissions = r[2] || [];
+        var fromDb = r[0] || {};
+        if(Object.keys(fromDb).length){ state = fromDb; return; }
+        return seedFromSite().then(function(seed){
+          state = {};
+          if(Object.keys(seed).length){
+            draft = seed;            /* já entra como alteração pendente */
+            needsFirstSave = true;
+          }
+        });
       });
   }
 
@@ -113,6 +143,8 @@
     DB.saveContent(draft)
       .then(function(){
         state = draft; draft = null;
+        needsFirstSave = false;
+        $("#adm-offline").hidden = true;
         $("#adm-state").textContent = "salvo ✓ o site já mostra";
         renderAdmin();
       })
@@ -122,6 +154,12 @@
       .then(function(){ btn.disabled = false; });
   });
   $("#adm-revert").addEventListener("click", function(){
+    /* na primeira vez o rascunho É o conteúdo do site: descartar aqui
+       deixaria o painel vazio sem ter salvo nada */
+    if(needsFirstSave){
+      $("#adm-state").textContent = "salve uma vez antes de descartar";
+      return;
+    }
     draft = null; $("#adm-state").textContent = ""; renderAdmin();
   });
 
