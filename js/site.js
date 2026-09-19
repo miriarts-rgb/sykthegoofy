@@ -634,17 +634,32 @@
   }
 
   /* sementinhas soltas boiando no fundo das faixas */
+  /* Sementinhas soltas no fundo das faixas. A quantidade acompanha a
+     altura da seção — uma faixa curta com 18 sementes viraria sujeira,
+     e uma longa com 5 fica vazia. Tamanho, giro e transparência variam
+     para não parecerem carimbadas. */
   function seedfall(){
     if(reduceMo) return;
     $$("section.cream, section.ground").forEach(function(sec, si){
       var layer = document.createElement("div");
       layer.className = "seedfall"; layer.setAttribute("aria-hidden","true");
-      for(var i = 0; i < 5; i++){
+
+      var altura = sec.offsetHeight || 600;
+      var quantas = Math.max(8, Math.min(26, Math.round(altura / 95)));
+
+      for(var i = 0; i < quantas; i++){
         var s = document.createElement("i");
-        s.style.left = (7 + ((i * 23 + si * 13) % 86)) + "%";
-        s.style.top  = (12 + ((i * 31 + si * 19) % 72)) + "%";
-        s.style.animationDelay = (-(i * 1.7 + si * 0.9)).toFixed(1) + "s";
-        s.style.animationDuration = (8 + (i % 3) * 1.6) + "s";
+        /* números primos diferentes espalham sem alinhar em fileira */
+        s.style.left = (3 + ((i * 37 + si * 17) % 93)) + "%";
+        s.style.top  = (4 + ((i * 53 + si * 29) % 91)) + "%";
+        var escala = 0.6 + ((i * 7 + si * 3) % 10) / 10;      /* 0,6 a 1,5 */
+        var giro   = ((i * 41 + si * 11) % 90) - 45;
+        s.style.width  = (6 * escala).toFixed(1) + "px";
+        s.style.height = (9 * escala).toFixed(1) + "px";
+        s.style.opacity = (0.22 + ((i * 3) % 5) * 0.07).toFixed(2);
+        s.style.setProperty("--giro", giro + "deg");
+        s.style.animationDelay = (-(i * 1.3 + si * 0.7)).toFixed(1) + "s";
+        s.style.animationDuration = (7.5 + (i % 4) * 1.4) + "s";
         layer.appendChild(s);
       }
       sec.insertBefore(layer, sec.firstChild);

@@ -93,11 +93,36 @@ img{max-width:100%}
 
 /* sementinhas soltas no fundo das faixas */
 .seedfall{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0}
-.seedfall i{position:absolute; width:7px; height:10px; border-radius:50%;
-  background:var(--seed); opacity:.42; animation:sy-bob 9s ease-in-out infinite}
-@keyframes sy-bob{0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-16px) rotate(18deg)}}
+.seedfall i{
+  position:absolute; width:7px; height:10px; border-radius:50%;
+  background:var(--seed); opacity:.42;
+  animation:sy-bob 9s ease-in-out infinite;
+}
+/* cada semente nasce com o próprio giro e volta para ele: sem isso
+   todas balançariam no mesmo ângulo e o padrão apareceria */
+@keyframes sy-bob{
+  0%,100%{transform:translateY(0) rotate(var(--giro,0deg))}
+  50%    {transform:translateY(-14px) rotate(calc(var(--giro,0deg) + 16deg))}
+}
 section{position:relative}
 section > .wrap{position:relative; z-index:1}
+/* textura fixa de sementinhas, a mesma ideia do hero. No fundo escuro
+   ela precisa ser bem mais discreta, senão vira chuvisco. */
+section.cream::before,
+section.ground::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity:.5;
+  background-image:
+    radial-gradient(ellipse 2px 3px at 11% 17%, var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 74% 9%,  var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 29% 61%, var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 57% 44%, var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 88% 72%, var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 41% 88%, var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 6% 79%,  var(--seed) 60%, transparent 61%),
+    radial-gradient(ellipse 2px 3px at 66% 27%, var(--seed) 60%, transparent 61%);
+  background-size:300px 240px;
+}
 
 @media (prefers-reduced-motion:reduce){
   /* mais suave, não zero: mantém o que ajuda a entender, corta o deslocamento */
@@ -120,6 +145,10 @@ section > .wrap{position:relative; z-index:1}
   background:var(--berry);
   clip-path:polygon(50% 100%,10% 62%,10% 28%,50% 8%,90% 28%,90% 62%);
 }
+/* quando a etiqueta faz as vezes de título, ganha um pouco mais de corpo
+   sem virar outro tamanho de fonte na página */
+h2.eyebrow{font-family:"DM Mono",monospace; font-size:.8rem; font-weight:500}
+.ych-lede{margin-top:12px; font-size:1.05rem; max-width:52ch}
 
 /* ---------- cursor da casa ----------
    Só em ponteiro fino: no toque não existe cursor. Desligável no topo,
