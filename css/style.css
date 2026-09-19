@@ -357,8 +357,12 @@ section.ground{background:var(--ground)}
 .step p{font-size:.92rem; color:var(--cocoa-soft)}
 
 /* ---------- galeria ---------- */
-.filters{display:flex; flex-direction:column; gap:12px; margin-bottom:26px}
-.filter-row{display:flex; gap:9px; flex-wrap:wrap; align-items:center}
+/* Linha normal que quebra: assim os chips ficam lado a lado mesmo se
+   vierem soltos, sem as linhas agrupadas. Cada .filter-row ocupa a
+   largura toda para começar em linha própria. */
+.filters{display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-bottom:26px}
+.filters .chipbtn{flex:none}          /* nunca esticar para a largura toda */
+.filter-row{display:flex; gap:9px; flex-wrap:wrap; align-items:center; flex:1 1 100%}
 .filter-label{
   font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.1em;
   text-transform:uppercase; color:var(--cocoa-soft);
