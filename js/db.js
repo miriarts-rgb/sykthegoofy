@@ -43,7 +43,7 @@ window.SykDB = (function(){
   function publicQueue(){
     if(!sb) return Promise.resolve([]);
     return sb.from("commissions")
-      .select("type,stage,created_at")
+      .select("label,type,stage,created_at")
       .neq("stage", "done")
       .order("created_at", {ascending:true})
       .then(function(r){

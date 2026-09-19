@@ -429,9 +429,14 @@ section.ground{background:var(--ground)}
 .qrow .what{font-size:.85rem; color:var(--cocoa-soft)}
 .pill{font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
   border:2px solid var(--line); border-radius:999px; padding:4px 11px; white-space:nowrap}
+/* a cor acompanha o avanco do trabalho: apagado, amarelo, rosa,
+   vermelho e enfim verde na entrega */
 .pill.wait{background:var(--cream-deep)}
 .pill.sketch{background:var(--sun); color:var(--ink)}
-.pill.color{background:var(--blush); color:var(--ink)}
+.pill.line{background:var(--sun-deep); color:var(--ink)}
+.pill.flat{background:var(--blush); color:var(--ink)}
+.pill.color{background:var(--berry); color:#fff}
+.pill.render{background:var(--leaf-deep); color:#fff}
 .pill.done{background:var(--leaf); color:var(--ink)}
 .qnum{font-family:"DM Mono",monospace; font-size:.85rem; color:var(--cocoa-soft); width:22px}
 

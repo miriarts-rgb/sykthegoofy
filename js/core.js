@@ -40,11 +40,17 @@ window.SykCore = (function(){
 
   var PAIDLBL = {no:"não pago", half:"50% pago", full:"pago"};
   var BGLBL   = {none:"sem fundo", simple:"fundo simples", detailed:"fundo detalhado"};
+  /* A ordem aqui é a ordem do trabalho, e é ela que monta a lista de
+     etapas no painel. "color" continua existindo porque comissões
+     antigas foram salvas com ele. */
   var STAGES  = {
-    wait:  {pt:"na fila",  en:"queued"},
-    sketch:{pt:"sketch",   en:"sketch"},
-    color: {pt:"pintando", en:"colouring"},
-    done:  {pt:"entregue", en:"delivered"}
+    wait:  {pt:"na fila",     en:"queued"},
+    sketch:{pt:"sketch",      en:"sketch"},
+    line:  {pt:"lineart",     en:"lineart"},
+    flat:  {pt:"cor chapada", en:"flat colour"},
+    color: {pt:"pintando",    en:"colouring"},
+    render:{pt:"render",      en:"rendering"},
+    done:  {pt:"entregue",    en:"delivered"}
   };
   /* Duas famílias de etiqueta: o QUE é o trabalho e QUEM está desenhado.
      Uma arte costuma ter uma de cada — "full body" + "feral", por exemplo.
@@ -103,7 +109,7 @@ window.SykCore = (function(){
   function publicQueue(){
     return Studio.d.commissions
       .filter(function(c){ return c.stage !== "done"; })
-      .map(function(c){ return {type:c.type||"", stage:c.stage||"wait"}; });
+      .map(function(c){ return {label:c.label||"", type:c.type||"", stage:c.stage||"wait"}; });
   }
 
   /* senha do painel.

@@ -177,13 +177,17 @@
       return;
     }
     q.forEach(function(item, i){
-      var st = STAGES[item.stage] || STAGES.wait;
+      var et = STAGES[item.stage] ? item.stage : "wait", st = STAGES[et];
       var row = document.createElement("div"); row.className = "qrow";
       row.innerHTML = '<span class="qnum">' + String(i+1).padStart(2,"0") + '</span>' +
         '<div><div class="who"></div><div class="what"></div></div>' +
-        '<span class="pill ' + item.stage + '"></span>';
-      /* a fila pública é anônima: posição, tipo e etapa, nunca o cliente */
-      row.querySelector(".who").textContent = (lang==="en" ? "Commission " : "Comissão ") + String(i+1).padStart(2,"0");
+        '<span class="pill ' + et + '"></span>';
+      /* A fila continua anônima: o nome aqui é escrito pela artista no
+         painel, não vem do cadastro do cliente. Sem nome, cai na
+         numeração de sempre. */
+      var nome = (item.label || "").trim();
+      row.querySelector(".who").textContent = nome ||
+        ((lang==="en" ? "Commission " : "Comissão ") + String(i+1).padStart(2,"0"));
       row.querySelector(".what").textContent = typeName(item.type);
       row.querySelector(".pill").textContent = pick(st,"pt","en");
       box.appendChild(row);

@@ -327,6 +327,9 @@
       return;
     }
     cs.forEach(function(c, i){
+      /* etapa desconhecida (registro antigo, ou digitada direto no banco)
+         não pode derrubar o painel inteiro */
+      var et = STAGES[c.stage] ? c.stage : "wait";
       var card = document.createElement("div");
       card.className = "kan-card" + (C.isLate(c) ? " late" : "");
       card.innerHTML =
@@ -334,15 +337,19 @@
           '<div class="top">' +
             (posDe[c.id] ? '<span class="fila-pos">' + posDe[c.id] + 'º na fila</span>' : '') +
             '<span class="who"></span>' +
-            '<span class="pill ' + (c.stage||"wait") + '"></span>' +
+            '<span class="pill ' + et + '"></span>' +
             '<span class="pill paid-' + (c.paid||"no") + '"></span>' +
             (C.isLate(c) ? '<span class="late-flag">atrasada</span>' : '') +
           '</div>' +
+          '<label class="pub-field">' +
+            '<span>o site mostra</span>' +
+            '<input type="text" class="pub-input" placeholder="Comissão ' + (posDe[c.id] ? String(posDe[c.id]).padStart(2,"0") : "01") + '" ' +
+              'aria-label="Nome que aparece na fila do site">' +
+          '</label>' +
           '<div class="kan-grid">' +
             '<input type="text" placeholder="@cliente" aria-label="Cliente">' +
             '<select aria-label="Tipo"></select>' +
-            '<select aria-label="Etapa"><option value="wait">na fila</option><option value="sketch">sketch</option>' +
-              '<option value="color">pintando</option><option value="done">entregue</option></select>' +
+            '<select aria-label="Etapa"></select>' +
             '<select aria-label="Pagamento"><option value="no">não pago</option><option value="half">50% pago</option>' +
               '<option value="full">pago</option></select>' +
             '<select aria-label="Moeda"><option value="BRL">R$ real</option><option value="USD">$ dólar</option></select>' +
@@ -353,10 +360,18 @@
         '<button class="iconbtn" type="button" title="remover">✕</button>';
 
       card.querySelector(".who").textContent = c.who || "sem nome";
-      card.querySelector(".pill." + (c.stage||"wait")).textContent = STAGES[c.stage||"wait"].pt;
+      card.querySelector(".pill." + et).textContent = STAGES[et].pt;
       card.querySelector(".pill.paid-" + (c.paid||"no")).textContent = C.PAIDLBL[c.paid||"no"];
 
-      var ins = card.querySelectorAll("input"), sels = card.querySelectorAll("select");
+      var ins = card.querySelectorAll(".kan-grid input"), sels = card.querySelectorAll("select");
+      var pubIn = card.querySelector(".pub-input");
+      /* etapas montadas a partir da lista única: acrescentar uma em
+         core.js basta para ela aparecer aqui */
+      Object.keys(STAGES).forEach(function(k){
+        var o = document.createElement("option");
+        o.value = k; o.textContent = STAGES[k].pt;
+        sels[1].appendChild(o);
+      });
       var typeSel = sels[0], moedaSel = sels[3];
       (S().prices||[]).forEach(function(p){
         var o = document.createElement("option"); o.value = p.id; o.textContent = p.pt; typeSel.appendChild(o);
@@ -370,13 +385,16 @@
         oy.textContent = y.name_pt || y.name_en || "YCH do mês";
         typeSel.appendChild(oy);
       }
+      pubIn.value = c.label || "";
       ins[0].value = c.who || ""; typeSel.value = c.type || "";
-      sels[1].value = c.stage || "wait"; sels[2].value = c.paid || "no";
+      sels[1].value = et; sels[2].value = c.paid || "no";
       moedaSel.value = c.cur || "BRL";
       ins[1].value = c.value != null ? c.value : ""; ins[2].value = c.deadline || "";
       ins[1].placeholder = "valor " + (moedaSel.value === "USD" ? "$" : "R$");
 
       var setWho = debounced(c, "who"), setValue = debounced(c, "value");
+      var setLabel = debounced(c, "label");
+      pubIn.addEventListener("input", function(){ setLabel(pubIn.value.trim() || null); });
       ins[0].addEventListener("input", function(){ setWho(ins[0].value); });
       ins[1].addEventListener("input", function(){
         setValue(ins[1].value === "" ? null : +ins[1].value);

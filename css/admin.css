@@ -117,3 +117,10 @@ body{min-height:100%}
 .fila-pos{font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.04em;
   background:var(--sun); color:var(--ink); border:2px solid var(--line);
   border-radius:999px; padding:2px 9px; white-space:nowrap}
+
+/* nome publico: o unico campo desta aba que o visitante le, entao fica
+   sozinho numa linha em vez de sumir no meio da grade */
+.pub-field{display:flex; gap:9px; align-items:center; margin-top:8px}
+.pub-field span{font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--cocoa-soft); white-space:nowrap}
+.pub-field input{font-size:.9rem; font-weight:700; padding:8px 11px}
