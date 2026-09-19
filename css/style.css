@@ -485,6 +485,155 @@ footer.site .wrap{display:flex; gap:18px; flex-wrap:wrap; align-items:center; ju
 footer.site a{color:var(--link-on-cocoa)}
 .foot-note{font-size:.84rem; opacity:.75; max-width:46ch}
 
+
+/* ===== movido de volta do admin.css: isto e do site ===== */
+/* ---------- YCH ---------- */
+.ych-card{display:grid; grid-template-columns:minmax(0,320px) 1fr; gap:0; background:var(--panel);
+  border:3px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden}
+.ych-card .art{aspect-ratio:1/1; max-width:100%; background:var(--sun-pale); border-inline-end:3px solid var(--line);
+  display:grid; place-items:center; overflow:hidden}
+.ych-card .art img{width:100%; height:100%; object-fit:cover}
+.ych-body{padding:26px 28px; display:flex; flex-direction:column; gap:12px; justify-content:center}
+.ych-body h3{font-size:1.6rem}
+.ych-meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px}
+.ych-price{font-family:"DM Mono",monospace; font-size:1.7rem; font-weight:500; color:var(--berry-text)}
+.ych-title{display:flex; align-items:center; gap:11px; flex-wrap:wrap}
+.usd-only{font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.06em;
+  color:var(--cocoa-soft); align-self:center}
+/* selo de "animado": pisca de leve, dizendo que a base tem movimento */
+.anim-tag{font-family:"DM Mono",monospace; font-size:.74rem; letter-spacing:.08em;
+  text-transform:uppercase; background:var(--leaf); color:var(--ink);
+  border:2px solid var(--line); border-radius:999px; padding:3px 10px;
+  animation:sy-anim-tag 2.6s ease-in-out infinite}
+@keyframes sy-anim-tag{0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-3px) rotate(2deg)}}
+.ych-empty{display:grid; place-items:center; gap:8px; text-align:center; color:var(--ink-soft)}
+.ych-empty span{font-size:2.2rem; line-height:1}
+.ych-empty p{font-family:"DM Mono",monospace; font-size:.78rem; letter-spacing:.06em}
+/* a moldura do YCH respira, sinalizando que ali tem movimento */
+.ych-card .art{animation:sy-ych 7s ease-in-out infinite}
+@keyframes sy-ych{0%,100%{background-position:0% 50%} 50%{background-position:100% 50%}}
+.ych-card .art{background:linear-gradient(115deg,var(--sun-pale),var(--cream-deep),var(--sun-pale));
+  background-size:220% 220%}
+@media (prefers-reduced-motion:reduce){
+  .anim-tag,.ych-card .art{animation:none !important}
+}
+
+/* ---------- orçamento ao vivo ---------- */
+/* Orçamento: lido como uma notinha de papel. Descrição à esquerda,
+   valor à direita alinhado por vírgula, e uma linha pontilhada ligando
+   os dois — como conta de restaurante, que é o que isto é. */
+.estimate{
+  background:var(--cream); border:2px solid var(--line); border-radius:16px;
+  padding:20px 22px 18px; margin-top:18px; position:relative;
+}
+/* picote no topo, para lembrar recibo */
+.estimate::before{
+  content:""; position:absolute; left:14px; right:14px; top:-2px; height:4px;
+  background:radial-gradient(circle at 5px 0, var(--ground) 0 4px, transparent 5px) 0 0/10px 4px repeat-x;
+}
+.estimate .eyebrow{margin-bottom:12px}
+
+.est-line{
+  display:grid; grid-template-columns:1fr auto; align-items:baseline;
+  gap:4px 10px; padding:9px 0; font-size:.94rem;
+}
+.est-line + .est-line{border-top:1px dotted var(--line)}
+/* o pontilhado que liga a descrição ao valor */
+.est-line > span:first-child{
+  display:flex; align-items:baseline; gap:8px; min-width:0;
+}
+.est-line > span:first-child::after{
+  content:""; flex:1; height:0; min-width:18px;
+  border-bottom:1px dotted var(--cocoa-soft); opacity:.55;
+  transform:translateY(-3px);
+}
+.est-line > span:last-child{
+  font-family:"DM Mono",monospace; font-variant-numeric:tabular-nums;
+  white-space:nowrap; font-weight:500;
+}
+.est-line small{
+  font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.04em;
+  color:var(--ink); background:var(--sun); border-radius:999px;
+  padding:1px 7px; flex:none;
+}
+.est-total{
+  display:grid; grid-template-columns:1fr auto; align-items:baseline; gap:10px;
+  padding-top:14px; margin-top:8px; border-top:2px solid var(--line);
+}
+.est-total span{font-family:"Fraunces",serif; font-weight:900; font-size:1.05rem}
+.est-total strong{
+  font-family:"DM Mono",monospace; font-size:1.7rem; line-height:1;
+  color:var(--berry-text); font-variant-numeric:tabular-nums;
+}
+.est-foot{
+  font-size:.8rem; color:var(--cocoa-soft); margin-top:12px;
+  padding-top:10px; border-top:1px dotted var(--line);
+}
+/* Escolha de fundo: cartões com uma miniatura desenhada do que cada
+   opção significa, em vez de três bolinhas de rádio. O desenho é feito
+   em CSS puro — nada de imagem a carregar. */
+.opt-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+.opt{cursor:pointer; position:relative; display:block; text-transform:none; letter-spacing:0}
+.opt input{position:absolute; opacity:0; width:0; height:0}
+.opt span{
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  border:2px solid var(--line); border-radius:14px; padding:13px 10px 11px;
+  font-size:.84rem; font-weight:700; background:var(--ground); color:var(--cocoa);
+  text-align:center; line-height:1.25;
+  transition:border-color .16s var(--ease-out), background .16s var(--ease-out),
+             transform .16s var(--ease-out);
+}
+/* a miniatura: um quadradinho que representa o fundo da arte */
+.opt span::before{
+  content:""; width:100%; aspect-ratio:4/3; border-radius:8px;
+  border:2px solid var(--line); background:var(--cream-deep);
+}
+.opt:nth-child(2) span::before{
+  background:linear-gradient(140deg, var(--sun-pale), var(--cream-deep));
+}
+.opt:nth-child(3) span::before{
+  background:
+    radial-gradient(circle at 26% 68%, var(--leaf-deep) 0 14%, transparent 15%),
+    radial-gradient(circle at 62% 74%, var(--leaf-deep) 0 11%, transparent 12%),
+    radial-gradient(circle at 80% 30%, var(--seed) 0 8%, transparent 9%),
+    linear-gradient(160deg, var(--sun-pale), var(--berry-deep));
+}
+@media (hover:hover) and (pointer:fine){
+  .opt:hover span{border-color:var(--cocoa-soft); transform:translateY(-2px)}
+}
+.opt input:checked + span{
+  background:var(--sun); color:var(--ink); border-color:var(--ink);
+  box-shadow:var(--shadow-sm);
+}
+.opt input:checked + span::before{border-color:var(--ink)}
+.opt input:focus-visible + span{outline:3px solid var(--berry); outline-offset:3px}
+@media (max-width:520px){
+  .opt-row{grid-template-columns:1fr}
+  .opt span{flex-direction:row; align-items:center; gap:12px; text-align:left; padding:10px 12px}
+  .opt span::before{width:56px; flex:none; aspect-ratio:4/3}
+}
+
+/* ---------- lightbox ---------- */
+dialog#lightbox{border:0; background:transparent; padding:0; max-width:96vw; max-height:92vh; overflow:visible}
+dialog#lightbox::backdrop{background:rgba(30,20,16,.82)}
+.lb-inner{background:var(--panel); border:3px solid var(--line); border-radius:var(--r); overflow:hidden;
+  box-shadow:var(--shadow)}
+.lb-inner img,.lb-inner video{display:block; max-width:88vw; max-height:74vh; width:auto; height:auto}
+.lb-bar{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  padding:12px 16px; border-top:3px solid var(--line); background:var(--cream)}
+.play-badge{position:absolute; left:8px; top:8px; font-family:"DM Mono",monospace; font-size:.64rem;
+  letter-spacing:.06em; background:var(--cocoa); color:var(--ground); border-radius:999px; padding:3px 9px}
+.gal figure button.open{all:unset; cursor:zoom-in; display:block; width:100%}
+
+/* entrada do painel: discreta no rodapé, como um link a mais */
+.foot-admin{
+  background:none; border:0; padding:0; cursor:pointer;
+  font-family:inherit; font-size:.9rem; color:var(--link-on-cocoa);
+  text-decoration:underline; text-underline-offset:3px;
+}
+.foot-admin:hover{color:var(--cream)}
+
+
 @media (max-width:900px){
   .ych-card{grid-template-columns:1fr}
   .ych-card .art{border-inline-end:0; border-bottom:3px solid var(--line)}

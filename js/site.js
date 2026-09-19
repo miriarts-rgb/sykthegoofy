@@ -407,16 +407,20 @@
            : "Esse aqui é orçado caso a caso. Manda o formulário que eu te passo um valor.") + '</p>';
       return;
     }
+    /* o acabamento vira etiqueta, igual aos acréscimos: as linhas ficam
+       com a mesma forma e o olho compara os valores sem esforço */
     var html = '<p class="eyebrow">' + (L?"Live estimate":"Orçamento ao vivo") + '</p>' +
-      '<div class="est-line"><span>' + q.label + ' · ' +
-      ($("#f-finish").value==="flat"?"Flat colour":"Rendered") + '</span><span>' + money2(q.base) + '</span></div>';
+      '<div class="est-line"><span>' + q.label +
+      ' <small>' + ($("#f-finish").value==="flat"?"flat":"rendered") + '</small></span>' +
+      '<span>' + money2(q.base) + '</span></div>';
     q.lines.forEach(function(l){
-      html += '<div class="est-line"><span>' + l.label + ' <small>+' + l.pct + '%</small></span><span>+ ' + money2(l.value) + '</span></div>';
+      html += '<div class="est-line"><span>' + l.label + ' <small>+' + l.pct + '%</small></span>' +
+        '<span>+ ' + money2(l.value) + '</span></div>';
     });
     html += '<div class="est-total"><span>' + (L?"Total":"Total") + '</span><strong>' + money2(q.total) + '</strong></div>' +
       '<p class="est-foot">' + (L
-        ? "An estimate, not a closed price — I confirm it after reading your request. Half upfront, half after the sketch."
-        : "É estimativa, não preço fechado: eu confirmo depois de ler seu pedido. Metade adiantada, metade depois do sketch.") + '</p>';
+        ? "An estimate, not a closed price. I confirm it after reading your request. Half upfront, half after the sketch."
+        : "É estimativa, não preço fechado. Eu confirmo depois de ler seu pedido. Metade adiantada, metade depois do sketch.") + '</p>';
     box.innerHTML = html;
   }
 
