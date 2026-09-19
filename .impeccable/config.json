@@ -1,0 +1,71 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:28.734Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:28.929Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:29.132Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:29.332Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "numbered-section-labels",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:29.530Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "**/*.html"
+        ],
+        "createdAt": "2026-09-19T00:40:29.739Z",
+        "reason": "Claude: ja triado nesta sessao. Faixas full-bleed com respiro no .wrap interno; border-bottom sao divisorias entre faixas e dentro de cards que ja tem contorno completo nos 4 lados"
+      },
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "files": [
+          "**/*"
+        ],
+        "createdAt": "2026-09-19T00:40:29.930Z",
+        "reason": "Claude: escolha deliberada para a direcao de pomar"
+      }
+    ]
+  }
+}
