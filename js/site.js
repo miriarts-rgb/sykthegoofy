@@ -6,7 +6,7 @@
 
 
 
-  var state, draft = null, lang = "pt", cur = "BRL", filter = "all";
+  var state, draft = null, lang = "pt", cur = "BRL", filter = "all", galOrdem = "recentes";
 
   /* O que está no HTML é a reserva: garante a página completa no primeiro
      instante e mantém o site de pé se o banco não responder. Logo em
@@ -291,14 +291,37 @@
       });
       box.appendChild(linha);
     });
+
+    /* ordem: só aparece quando há peças o bastante para a ordem importar */
+    if((S().gallery || []).length > 3){
+      var linhaOrdem = document.createElement("div");
+      linhaOrdem.className = "filter-row";
+      var rot = document.createElement("span");
+      rot.className = "filter-label";
+      rot.textContent = lang === "en" ? "Order" : "Ordem";
+      linhaOrdem.appendChild(rot);
+      [["recentes", lang==="en" ? "Newest first" : "Mais recentes"],
+       ["antigas",  lang==="en" ? "Oldest first" : "Mais antigas"]].forEach(function(o){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chipbtn";
+        b.textContent = o[1];
+        b.setAttribute("aria-pressed", String(o[0] === galOrdem));
+        b.addEventListener("click", function(){ galOrdem = o[0]; renderFilters(); renderGallery(); });
+        linhaOrdem.appendChild(b);
+      });
+      box.appendChild(linhaOrdem);
+    }
   }
   function tagLabel(id){ var t = TAGS.filter(function(x){return x.id===id;})[0]; return t ? pick(t,"pt","en") : id; }
   function renderGallery(){
     var box = $("#gal"); if(!box) return;
     box.innerHTML = "";
+    /* a galeria já vem com a mais nova na frente (o painel põe no topo);
+       este botão deixa ver as antigas primeiro quando alguém quiser */
     var items = (S().gallery||[]).filter(function(g){
       return filter === "all" || (g.tags||[]).indexOf(filter) > -1;
     });
+    if(galOrdem === "antigas") items = items.slice().reverse();
     if(!items.length){
       box.innerHTML = '<div class="gal-empty"><p style="font-weight:700; margin-bottom:6px">' +
         (lang==="en" ? "No pieces here yet." : "Ainda não tem nada aqui.") + '</p><p style="font-size:.9rem">' +

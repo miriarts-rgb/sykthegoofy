@@ -88,6 +88,19 @@ body{min-height:100%}
 .adm-page .adm-foot{position:sticky; bottom:0; flex-wrap:wrap}
 .adm-mode{font-size:.8rem; color:var(--cocoa-soft); flex:1 1 220px; min-width:0}
 
+/* área de colar: aceita Ctrl+V, arrastar e clicar, as três coisas */
+.paste-zone{
+  border:2px dashed var(--line); border-radius:14px; background:var(--ground);
+  padding:20px 18px; text-align:center; cursor:pointer; color:var(--cocoa);
+  display:flex; flex-direction:column; gap:4px; align-items:center;
+  transition:border-color .16s var(--ease-out), background .16s var(--ease-out);
+}
+.paste-zone b{font-family:"Fraunces",serif; font-size:1.02rem}
+.paste-zone span{font-size:.82rem; color:var(--cocoa-soft); max-width:46ch}
+.paste-zone:hover,.paste-zone:focus-visible{border-color:var(--sun); background:var(--panel)}
+.paste-zone.drag{border-color:var(--sun); background:var(--panel); border-style:solid}
+.paste-zone.busy{border-style:solid; border-color:var(--leaf)}
+
 /* etiquetas da galeria: clicar em vez de digitar */
 .tag-pick{display:flex; flex-wrap:wrap; gap:5px; align-items:flex-start}
 .tag-chip{

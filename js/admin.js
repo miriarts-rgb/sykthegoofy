@@ -17,6 +17,7 @@
   var DB = window.SykDB;
 
   var state = null, draft = null, needsFirstSave = false;
+  var galAntigas = false;   /* galeria do painel: recentes primeiro por padrao */
   function S(){ return draft || state || {}; }
   function startDraft(){ if(!draft) draft = C.clone(state || {}); }
   function markDirty(){ $("#adm-state").textContent = "alterações não salvas"; }
@@ -448,14 +449,8 @@
       '<button class="chipbtn" type="button" id="adm-ych-anim"></button>';
     yrow.querySelector("input").addEventListener("change", function(){
       var f = this.files && this.files[0]; if(!f) return;
-      var isVid = /^video\//.test(f.type), fr = new FileReader();
-      fr.onload = function(){
-        startDraft(); draft.ych = draft.ych || {};
-        draft.ych.image = fr.result; draft.ych.video = isVid;
-        if(isVid) draft.ych.animated = true;
-        markDirty(); renderAdmin();
-      };
-      fr.readAsDataURL(f); this.value = "";
+      enviarYch(f);
+      this.value = "";
     });
     yf.appendChild(yrow);
     var animBtn = yrow.querySelector("#adm-ych-anim");
@@ -466,7 +461,14 @@
     });
 
     var gb = $("#adm-gallery"); gb.innerHTML = "";
-    (s.gallery||[]).forEach(function(g, i){
+    var botaoOrdem = $("#gal-sort");
+    if(botaoOrdem) botaoOrdem.textContent = galAntigas ? "mais antigas primeiro" : "mais recentes primeiro";
+    /* a lista guarda a mais nova na frente; aqui só muda o que se vê,
+       o índice real continua sendo o da lista */
+    var lista = (s.gallery||[]).map(function(g, i){ return {g:g, i:i}; });
+    if(galAntigas) lista.reverse();
+    lista.forEach(function(par){
+      var g = par.g, i = par.i;
       var row = document.createElement("div"); row.className = "adm-row";
       row.style.gridTemplateColumns = "54px 1fr auto";
       row.innerHTML = '<div class="tag-pick"></div>' +
@@ -569,9 +571,101 @@
     });
   }
 
-  $("#adm-gal-file").addEventListener("change", function(){
-    var files = Array.prototype.slice.call(this.files || []);
-    if(!files.length) return;
+  /* ---------- colar, arrastar ou escolher ----------
+     Uma área que aceita as três coisas. O Ctrl+V só é ouvido quando a
+     aba correspondente está aberta, senão colar na galeria mandaria a
+     imagem para o YCH sem querer. */
+  function tiraArquivos(dt){
+    var out = [];
+    if(!dt) return out;
+    if(dt.items){
+      Array.prototype.forEach.call(dt.items, function(it){
+        if(it.kind !== "file") return;
+        var f = it.getAsFile();
+        if(f && /^(image|video)\//.test(f.type)) out.push(f);
+      });
+    } else if(dt.files){
+      Array.prototype.forEach.call(dt.files, function(f){
+        if(/^(image|video)\//.test(f.type)) out.push(f);
+      });
+    }
+    return out;
+  }
+
+  function ligarZona(zonaId, paneName, receber){
+    var zona = $(zonaId); if(!zona) return;
+
+    function ocupado(sim){ zona.classList[sim ? "add" : "remove"]("busy"); }
+    function tratar(files){
+      if(!files.length) return;
+      ocupado(true);
+      Promise.resolve(receber(files)).then(function(){ ocupado(false); });
+    }
+
+    zona.addEventListener("click", function(){ $("#adm-gal-file") && abrirEscolha(paneName); });
+    zona.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); abrirEscolha(paneName); }
+    });
+    ["dragenter","dragover"].forEach(function(ev){
+      zona.addEventListener(ev, function(e){ e.preventDefault(); zona.classList.add("drag"); });
+    });
+    ["dragleave","drop"].forEach(function(ev){
+      zona.addEventListener(ev, function(e){ e.preventDefault(); zona.classList.remove("drag"); });
+    });
+    zona.addEventListener("drop", function(e){ tratar(tiraArquivos(e.dataTransfer)); });
+
+    /* colar vale para a aba que está aberta, venha o foco de onde vier */
+    document.addEventListener("paste", function(e){
+      var pane = document.querySelector('.adm-pane[data-pane="' + paneName + '"]');
+      if(!pane || pane.hidden) return;
+      var files = tiraArquivos(e.clipboardData);
+      if(!files.length) return;
+      e.preventDefault();
+      tratar(files);
+    });
+  }
+
+  function abrirEscolha(paneName){
+    if(paneName === "galeria") $("#adm-gal-file").click();
+    else {
+      var inp = $("#adm-ych-fields") && $("#adm-ych-fields").querySelector('input[type="file"]');
+      if(inp) inp.click();
+    }
+  }
+
+  /* A arte do YCH também vai para o armazenamento. Antes virava texto
+     dentro do registro do site — com uma imagem já era pesado; com um
+     vídeo, inviável. */
+  function enviarYch(file){
+    var msg = $("#adm-ych-state");
+    var isVid = /^video\//.test(file.type);
+    if(msg) msg.textContent = "enviando…";
+    var prep = isVid
+      ? Promise.resolve({blob:file, ext:(file.name.split(".").pop() || "mp4").toLowerCase()})
+      : shrinkToBlob(file);
+    return prep
+      .then(function(p){ return DB.uploadArt(p.blob, p.ext); })
+      .then(function(up){
+        startDraft();
+        draft.ych = draft.ych || {};
+        /* troca de arte: o arquivo antigo sai do armazenamento */
+        var velho = draft.ych.path;
+        draft.ych.image = up.url;
+        draft.ych.path  = up.path;
+        draft.ych.video = isVid;
+        if(isVid) draft.ych.animated = true;
+        if(velho) DB.deleteArt(velho);
+        markDirty(); renderAdmin();
+        if(msg) msg.textContent = isVid ? "vídeo no ar ✓" : "imagem no ar ✓";
+      })
+      .catch(function(e){
+        if(msg) msg.textContent = "não subiu: " + ((e && e.message) || "erro");
+      });
+  }
+
+  /* envio da galeria, usado pelo botão, pelo arrastar e pelo colar */
+  function enviarGaleria(files){
+    if(!files.length) return Promise.resolve();
     startDraft();
     draft.gallery = draft.gallery || [];
     var msg = $("#adm-gal-size"), done = 0, failed = 0;
@@ -579,18 +673,19 @@
 
     /* um de cada vez: mais lento, porém o progresso é real e uma arte
        que falhe não derruba o envio das outras */
-    files.reduce(function(chain, file){
+    return files.reduce(function(chain, file){
       return chain.then(function(){
         var isVideo = /^video\//.test(file.type);
         var prep = isVideo
-          ? Promise.resolve({blob:file, ext:(file.name.split(".").pop() || "mp4").toLowerCase()})
+          ? Promise.resolve({blob:file, ext:((file.name||"video.mp4").split(".").pop() || "mp4").toLowerCase()})
           : shrinkToBlob(file);
         return prep
           .then(function(p){ return DB.uploadArt(p.blob, p.ext); })
           .then(function(up){
-            var entry = {src:up.url, path:up.path, alt:"", tags:["furry"]};
+            var entry = {src:up.url, path:up.path, alt:"", tags:[], em:Date.now()};
             if(isVideo) entry.video = true;
-            draft.gallery.push(entry);
+            /* entra no topo: a peça recém-enviada é a que você quer ver */
+            draft.gallery.unshift(entry);
             done++;
           })
           .catch(function(){ failed++; })
@@ -600,10 +695,21 @@
       });
     }, Promise.resolve()).then(function(){
       markDirty(); renderAdmin();
-      if(failed) $("#adm-state").textContent = failed + " arquivo(s) não subiram";
+      $("#adm-state").textContent = failed
+        ? failed + " arquivo(s) não subiram"
+        : done + " arte(s) no ar — marque as etiquetas e salve";
     });
+  }
+  $("#adm-gal-file").addEventListener("change", function(){
+    enviarGaleria(Array.prototype.slice.call(this.files || []));
     this.value = "";
   });
+
+  var bo = $("#gal-sort");
+  if(bo) bo.addEventListener("click", function(){ galAntigas = !galAntigas; renderAdmin(); });
+
+  ligarZona("#gal-paste", "galeria", enviarGaleria);
+  ligarZona("#ych-paste", "ych", function(files){ return enviarYch(files[0]); });
   function bindText(sel, key){
     $(sel).addEventListener("input", function(){
       startDraft();
