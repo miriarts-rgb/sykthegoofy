@@ -31,7 +31,7 @@
     document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
     renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderStatus(); renderFilters(); renderGallery();
     renderTypes(); renderYch(); renderTexts(); renderEstimate();
-    renderSummary(); renderMarquee();
+    renderSummary(); renderMarquee(); syncYchFields();
   }
   $("#lang-btn").addEventListener("click", function(){
     lang = lang === "en" ? "pt" : "en";
@@ -364,9 +364,40 @@
       o.value = p.id; o.textContent = pick(p,"pt","en");
       sel.appendChild(o);
     });
+    /* o YCH do mês também é uma comissão que dá para pedir: sem ele na
+       lista, quem clicava em "pegar uma vaga" não achava o que escolher */
+    var y = S().ych || {};
+    if(y.active){
+      var o = document.createElement("option");
+      o.value = "ych";
+      o.textContent = pick(y,"name_pt","name_en") || (lang==="en" ? "YCH of the month" : "YCH do mês");
+      sel.appendChild(o);
+    }
     if(keep) sel.value = keep;
+    if(!sel.value) sel.selectedIndex = 0;
   }
-  function money2(v){ return (cur==="USD" ? "$" : "R$") + v; }
+
+  /* O YCH é uma base pronta: o preço é fechado, não tem acabamento a
+     escolher nem acréscimo de fundo ou personagem. Os campos que não se
+     aplicam ficam desligados, em vez de sugerir escolhas que não existem. */
+  function isYch(){ return $("#f-type") && $("#f-type").value === "ych"; }
+  function syncYchFields(){
+    var ych = isYch();
+    ["#f-finish","#f-chars","#f-cur"].forEach(function(s){
+      var el = $(s); if(el) el.disabled = ych;
+    });
+    $$("#f-bg input").forEach(function(r){ r.disabled = ych; });
+    var aviso = $("#ych-note");
+    if(aviso){
+      aviso.hidden = !ych;
+      aviso.textContent = lang === "en"
+        ? "The monthly YCH has a closed price: the base is already drawn, so there's no finish or add-on to pick."
+        : "O YCH do mês tem preço fechado: a base já está desenhada, então não há acabamento nem acréscimo a escolher.";
+    }
+  }
+  /* o YCH é vendido só em dólar, então o orçamento dele não segue
+     o seletor de moeda: a função aceita a moeda do próprio item */
+  function money2(v, moeda){ return ((moeda || cur) === "USD" ? "$" : "R$") + v; }
   function bgValue(){
     var el = document.querySelector('input[name="bg"]:checked');
     return el ? el.value : "none";
@@ -374,6 +405,18 @@
   /* orçamento: base do tipo/acabamento + acréscimos percentuais */
   function quote(){
     var s = S();
+    /* YCH: valor fechado em dólar, sem acréscimos */
+    if(isYch()){
+      var y = s.ych || {};
+      var v = y.priceUsd;
+      return {
+        base: (v === null || v === undefined || v === "") ? null : v,
+        lines: [],
+        total: (v === null || v === undefined || v === "") ? null : v,
+        label: pick(y,"name_pt","name_en") || (lang==="en" ? "YCH of the month" : "YCH do mês"),
+        moeda: "USD"
+      };
+    }
     var p = (s.prices||[]).filter(function(x){ return x.id === $("#f-type").value; })[0];
     if(!p) return null;
     var key = cur === "USD" ? "usd" : "brl";
@@ -414,15 +457,17 @@
     }
     /* o acabamento vira etiqueta, igual aos acréscimos: as linhas ficam
        com a mesma forma e o olho compara os valores sem esforço */
+    var m = q.moeda;
     var html = '<p class="eyebrow">' + (L?"Live estimate":"Orçamento ao vivo") + '</p>' +
       '<div class="est-line"><span>' + q.label +
-      ' <small>' + ($("#f-finish").value==="flat"?"flat":"rendered") + '</small></span>' +
-      '<span>' + money2(q.base) + '</span></div>';
+      (q.moeda ? ' <small>' + (L?"fixed price":"preço fechado") + '</small>'
+               : ' <small>' + ($("#f-finish").value==="flat"?"flat":"rendered") + '</small>') +
+      '</span><span>' + money2(q.base, m) + '</span></div>';
     q.lines.forEach(function(l){
       html += '<div class="est-line"><span>' + l.label + ' <small>+' + l.pct + '%</small></span>' +
-        '<span>+ ' + money2(l.value) + '</span></div>';
+        '<span>+ ' + money2(l.value, m) + '</span></div>';
     });
-    html += '<div class="est-total"><span>' + (L?"Total":"Total") + '</span><strong>' + money2(q.total) + '</strong></div>' +
+    html += '<div class="est-total"><span>' + (L?"Total":"Total") + '</span><strong>' + money2(q.total, m) + '</strong></div>' +
       '<p class="est-foot">' + (L
         ? "An estimate, not a closed price. I confirm it after reading your request. Half upfront, half after the sketch."
         : "É estimativa, não preço fechado. Eu confirmo depois de ler seu pedido. Metade adiantada, metade depois do sketch.") + '</p>';
@@ -433,7 +478,19 @@
     var out = $("#summary"); if(!out) return;
     var q = quote(), L = lang === "en";
     var bgLbl = {none:L?"none":"sem fundo", simple:L?"simple":"simples", detailed:L?"detailed":"detalhado"}[bgValue()];
-    var lines = [
+    /* no YCH não existe acabamento, fundo nem personagem extra a informar */
+    var lines = isYch() ? [
+      (L?"Hi Syk! I'd like the monthly YCH.":"Oi Syk! Queria o YCH do mês."), "",
+      (L?"Name/handle: ":"Nome/@: ") + ($("#f-name").value || "—"),
+      (L?"Reply on: ":"Responder em: ") + $("#f-contact").value,
+      (L?"Slot: ":"Vaga: ") + (q ? q.label : "YCH"),
+      (L?"Price: ":"Preço: ") + (!q || q.total===null ? (L?"to be agreed":"a combinar") : money2(q.total, "USD")),
+      (L?"Rating: ":"Classificação: ") + ($("#f-rating").value==="nsfw"?"NSFW":"SFW"),
+      (L?"Needed by: ":"Precisa até: ") + ($("#f-deadline").value || (L?"no rush":"sem pressa")),
+      (L?"References: ":"Referências: ") + ($("#f-refs").value || "—"), "",
+      (L?"My character:":"Meu personagem:"), ($("#f-desc").value || "—"), "",
+      (L?"I've read and agree to your terms of service.":"Li e concordo com os seus termos de serviço.")
+    ] : [
       (L?"Hi Syk! I'd like to commission you.":"Oi Syk! Queria te comissionar."), "",
       (L?"Name/handle: ":"Nome/@: ") + ($("#f-name").value || "—"),
       (L?"Reply on: ":"Responder em: ") + $("#f-contact").value,
@@ -452,9 +509,21 @@
   ["#f-name","#f-contact","#f-type","#f-finish","#f-rating","#f-cur","#f-refs","#f-desc","#f-chars","#f-deadline"].forEach(function(sel){
     var el = $(sel); if(el) el.addEventListener("input", function(){
       if(sel === "#f-cur"){ setCur(el.value); return; }
+      if(sel === "#f-type") syncYchFields();
       renderEstimate(); renderSummary();
     });
   });
+  /* o botao do YCH ja escolhe o tipo: antes levava ao formulario
+     com Headshot selecionado, e a vaga do mes nao aparecia */
+  var ychCta = $("#ych-cta");
+  if(ychCta) ychCta.addEventListener("click", function(){
+    var sel = $("#f-type");
+    if(sel && Array.prototype.some.call(sel.options, function(o){ return o.value === "ych"; })){
+      sel.value = "ych";
+      syncYchFields(); renderEstimate(); renderSummary();
+    }
+  });
+
   $("#f-bg").addEventListener("change", function(){ renderEstimate(); renderSummary(); });
   /* enviar pedido: grava no ateliê e confirma na hora */
   $("#send-btn").addEventListener("click", function(){
@@ -761,7 +830,7 @@
   if($("#f-cur")) $("#f-cur").value = cur;
   renderStatus(); renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderFilters(); renderGallery();
   renderTypes(); renderYch(); renderTexts(); renderEstimate();
-  renderSummary(); renderMarquee();
+  renderSummary(); renderMarquee(); syncYchFields();
   if(lang === "en") applyLang();
   setupReveal(); seedfall(); pawTrail();
 

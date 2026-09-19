@@ -155,6 +155,14 @@ section.ground::before{
    sem virar outro tamanho de fonte na página */
 h2.eyebrow{font-family:"DM Mono",monospace; font-size:.8rem; font-weight:500}
 .ych-lede{margin-top:12px; font-size:1.05rem; max-width:52ch}
+/* aviso no formulário quando o tipo escolhido é o YCH */
+.ych-note{
+  font-size:.86rem; color:var(--ink); background:var(--sun);
+  border:2px solid var(--line); border-radius:12px; padding:10px 14px;
+}
+/* campo desligado continua legível, só deixa de parecer clicável */
+input:disabled,select:disabled{opacity:.45; cursor:not-allowed}
+.opt input:disabled + span{opacity:.45; cursor:not-allowed}
 
 /* ---------- cursor da casa ----------
    Só em ponteiro fino: no toque não existe cursor. Desligável no topo,
