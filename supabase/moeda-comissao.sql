@@ -8,6 +8,10 @@
 -- continua sendo só (type, stage, created_at). Valor e moeda seguem
 -- visíveis apenas para quem tem login.
 --
+-- ORDEM IMPORTA: se for rodar junto com nome-e-etapas.sql, rode ESTE
+-- primeiro. Os dois refazem a permissão do visitante, e é o último a
+-- rodar que vale — este aqui não conhece a coluna do nome ainda.
+--
 -- Rode no SQL Editor do Supabase.
 -- ============================================================
 
