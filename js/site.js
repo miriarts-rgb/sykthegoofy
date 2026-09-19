@@ -250,16 +250,41 @@
   }
 
   /* ---------- galeria ---------- */
+  /* Quinze etiquetas numa fileira só viram sopa. Separadas em "o que é" e
+     "quem está desenhado", com rótulo, dá para achar o que se procura.
+     Uma etiqueta que ninguém usou some da lista, em vez de virar um botão
+     que não filtra nada. */
   function renderFilters(){
     var box = $("#filters"); if(!box) return;
     box.innerHTML = "";
-    TAGS.forEach(function(t){
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "chipbtn";
-      b.textContent = pick(t,"pt","en");
-      b.setAttribute("aria-pressed", String(t.id === filter));
-      b.addEventListener("click", function(){ filter = t.id; renderFilters(); renderGallery(); });
-      box.appendChild(b);
+    var usadas = {};
+    (S().gallery || []).forEach(function(g){
+      (g.tags || []).forEach(function(t){ usadas[t] = true; });
+    });
+
+    [["tipo", lang==="en" ? "Kind of work" : "Tipo de trabalho"],
+     ["quem", lang==="en" ? "Who's in it"  : "Quem aparece"]].forEach(function(par){
+      var doGrupo = TAGS.filter(function(t){
+        return t.grupo === par[0] && (t.id === "all" || usadas[t.id]);
+      });
+      if(doGrupo.length <= (par[0] === "tipo" ? 1 : 0)) return;   /* só "Tudo" não é filtro */
+
+      var linha = document.createElement("div");
+      linha.className = "filter-row";
+      var rotulo = document.createElement("span");
+      rotulo.className = "filter-label";
+      rotulo.textContent = par[1];
+      linha.appendChild(rotulo);
+
+      doGrupo.forEach(function(t){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "chipbtn";
+        b.textContent = pick(t,"pt","en");
+        b.setAttribute("aria-pressed", String(t.id === filter));
+        b.addEventListener("click", function(){ filter = t.id; renderFilters(); renderGallery(); });
+        linha.appendChild(b);
+      });
+      box.appendChild(linha);
     });
   }
   function tagLabel(id){ var t = TAGS.filter(function(x){return x.id===id;})[0]; return t ? pick(t,"pt","en") : id; }

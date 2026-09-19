@@ -25,7 +25,8 @@ window.SykDB = (function(){
     return sb.from("site_content").select("data").eq("id", 1).single()
       .then(function(r){
         if(r.error) throw r.error;
-        return (r.data && r.data.data) || null;
+        var got = (r.data && r.data.data) || null;
+        return got && window.SykCore ? window.SykCore.withCleanTags(got) : got;
       });
   }
   function saveContent(data){

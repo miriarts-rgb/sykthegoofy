@@ -46,16 +46,28 @@ window.SykCore = (function(){
     color: {pt:"pintando", en:"colouring"},
     done:  {pt:"entregue", en:"delivered"}
   };
+  /* Duas famílias de etiqueta: o QUE é o trabalho e QUEM está desenhado.
+     Uma arte costuma ter uma de cada — "full body" + "feral", por exemplo.
+     grupo: "tipo" aparece na primeira linha de filtros, "quem" na segunda. */
   var TAGS = [
-    {id:"all",    pt:"Tudo",               en:"Everything"},
-    {id:"furry",  pt:"Furry",              en:"Furry"},
-    {id:"feral",  pt:"Feral",              en:"Feral"},
-    {id:"kemono", pt:"Kemono",             en:"Kemono"},
-    {id:"pokemon",pt:"Pokémon",            en:"Pokémon"},
-    {id:"human",  pt:"Humano / kemonomimi",en:"Human / kemonomimi"},
-    {id:"mlp",    pt:"MLP",                en:"MLP"},
-    {id:"icon",   pt:"Ícone",              en:"Icon"},
-    {id:"full",   pt:"Full body",          en:"Full body"}
+    {id:"all",     grupo:"tipo", pt:"Tudo",                en:"Everything"},
+
+    {id:"icon",    grupo:"tipo", pt:"Headshot / ícone",    en:"Headshot / icon"},
+    {id:"half",    grupo:"tipo", pt:"Half body",           en:"Half body"},
+    {id:"full",    grupo:"tipo", pt:"Full body",           en:"Full body"},
+    {id:"ref",     grupo:"tipo", pt:"Reference sheet",     en:"Reference sheet"},
+    {id:"badge",   grupo:"tipo", pt:"Badge",               en:"Badge"},
+    {id:"ych",     grupo:"tipo", pt:"YCH",                 en:"YCH"},
+    {id:"animada", grupo:"tipo", pt:"Animada",             en:"Animated"},
+
+    {id:"furry",   grupo:"quem", pt:"Furry",               en:"Furry"},
+    {id:"feral",   grupo:"quem", pt:"Feral",               en:"Feral"},
+    {id:"kemono",  grupo:"quem", pt:"Kemono",              en:"Kemono"},
+    {id:"human",   grupo:"quem", pt:"Humano / kemonomimi", en:"Human / kemonomimi"},
+    {id:"pokemon", grupo:"quem", pt:"Pokémon",             en:"Pokémon"},
+    {id:"mlp",     grupo:"quem", pt:"MLP",                 en:"MLP"},
+    {id:"chibi",   grupo:"quem", pt:"Chibi",               en:"Chibi"},
+    {id:"casal",   grupo:"quem", pt:"Casal / dupla",       en:"Couple / duo"}
   ];
 
   function isLate(c){
@@ -98,12 +110,32 @@ window.SykCore = (function(){
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
+  /* Etiquetas antigas foram digitadas à mão e variavam na escrita
+     ("half body", "halfbody"), o que as deixava fora de qualquer filtro.
+     Converte para o identificador certo ao ler, venha de onde vier. */
+  var TAG_ANTIGA = {
+    "full body":"full", "fullbody":"full",
+    "half body":"half", "halfbody":"half",
+    "reference sheet":"ref", "referencesheet":"ref", "ref sheet":"ref",
+    "headshot":"icon", "icone":"icon", "ícone":"icon", "animated":"animada"
+  };
+  function normalizeTags(list){
+    return (list || [])
+      .map(function(t){ var k = String(t).trim().toLowerCase(); return TAG_ANTIGA[k] || k; })
+      .filter(function(t, i, a){ return t && a.indexOf(t) === i; });
+  }
+
   /* lê o bloco de estado de um documento (o próprio, ou um index.html baixado) */
   function readState(doc){
     try{
       var el = (doc || document).querySelector("#app-state");
-      return el ? JSON.parse(el.textContent) : null;
+      return el ? withCleanTags(JSON.parse(el.textContent)) : null;
     }catch(e){ return null; }
+  }
+  /* aplica a conversão de etiquetas em qualquer conteúdo que entre */
+  function withCleanTags(s){
+    if(s && s.gallery) s.gallery.forEach(function(g){ g.tags = normalizeTags(g.tags); });
+    return s;
   }
 
   return {
@@ -111,6 +143,7 @@ window.SykCore = (function(){
     PAIDLBL:PAIDLBL, BGLBL:BGLBL,
     metrics:metrics, isLate:isLate, publicQueue:publicQueue,
     hashPwd:hashPwd, PASS_KEY:PASS_KEY, DEFAULT_HASH:DEFAULT_HASH,
-    clone:clone, readState:readState
+    clone:clone, readState:readState,
+    normalizeTags:normalizeTags, withCleanTags:withCleanTags
   };
 })();

@@ -469,7 +469,7 @@
     (s.gallery||[]).forEach(function(g, i){
       var row = document.createElement("div"); row.className = "adm-row";
       row.style.gridTemplateColumns = "54px 1fr auto";
-      row.innerHTML = '<input type="text" placeholder="tags: furry, feral, icon" aria-label="Tags">' +
+      row.innerHTML = '<div class="tag-pick"></div>' +
         '<button class="iconbtn" type="button" title="remover">✕</button>';
       var thumb = document.createElement(g.video ? "video" : "img");
       thumb.src = g.src;
@@ -477,12 +477,27 @@
       else { thumb.alt = ""; }
       thumb.style.cssText = "width:54px;height:54px;object-fit:cover;border:2px solid var(--line);border-radius:9px";
       row.insertBefore(thumb, row.firstChild);
-      var inp = row.querySelector("input");
-      inp.value = (g.tags||[]).join(", ");
-      inp.addEventListener("input", function(){
-        startDraft();
-        draft.gallery[i].tags = inp.value.split(",").map(function(t){ return t.trim().toLowerCase(); }).filter(Boolean);
-        markDirty();
+
+      /* etiquetas por clique, não digitadas: digitar "ferral" criava um
+         filtro que nunca aparece e a arte ficava fora de tudo */
+      var pick = row.querySelector(".tag-pick");
+      C.TAGS.filter(function(t){ return t.id !== "all"; }).forEach(function(t){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "tag-chip";
+        b.textContent = t.pt;
+        var on = (g.tags||[]).indexOf(t.id) > -1;
+        b.setAttribute("aria-pressed", String(on));
+        b.addEventListener("click", function(){
+          startDraft();
+          var tags = draft.gallery[i].tags || [];
+          var at = tags.indexOf(t.id);
+          if(at > -1) tags.splice(at, 1); else tags.push(t.id);
+          draft.gallery[i].tags = tags;
+          b.setAttribute("aria-pressed", String(at === -1));
+          markDirty();
+        });
+        pick.appendChild(b);
       });
       row.querySelector(".iconbtn").addEventListener("click", function(){
         startDraft();

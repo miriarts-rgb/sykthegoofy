@@ -357,7 +357,14 @@ section.ground{background:var(--ground)}
 .step p{font-size:.92rem; color:var(--cocoa-soft)}
 
 /* ---------- galeria ---------- */
-.filters{display:flex; gap:9px; flex-wrap:wrap; margin-bottom:26px}
+.filters{display:flex; flex-direction:column; gap:12px; margin-bottom:26px}
+.filter-row{display:flex; gap:9px; flex-wrap:wrap; align-items:center}
+.filter-label{
+  font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--cocoa-soft);
+  min-width:112px; flex:none;
+}
+@media (max-width:620px){ .filter-label{min-width:100%; margin-bottom:-4px} }
 .gal{display:grid; grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:18px}
 .gal figure{margin:0; background:var(--panel); border:3px solid var(--line); border-radius:var(--r);
   box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column}

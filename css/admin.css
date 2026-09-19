@@ -155,4 +155,15 @@ body{min-height:100%}
 .adm-page .adm-head{position:sticky; top:0}
 .adm-page .adm-foot{position:sticky; bottom:0; flex-wrap:wrap}
 .adm-mode{font-size:.8rem; color:var(--cocoa-soft); flex:1 1 220px; min-width:0}
+
+/* etiquetas da galeria: clicar em vez de digitar */
+.tag-pick{display:flex; flex-wrap:wrap; gap:5px; align-items:flex-start}
+.tag-chip{
+  font-family:"DM Mono",monospace; font-size:.68rem; cursor:pointer;
+  border:2px solid var(--line); background:var(--ground); color:var(--cocoa-soft);
+  border-radius:999px; padding:3px 9px; line-height:1.4;
+}
+.tag-chip:hover{border-color:var(--cocoa-soft)}
+.tag-chip[aria-pressed="true"]{background:var(--sun); color:var(--ink); border-color:var(--line); font-weight:500}
+.adm-row:has(.tag-pick){align-items:start}
 @media (max-width:620px){ .adm-top{padding:10px 16px} .adm-page{margin-inline:12px} }
