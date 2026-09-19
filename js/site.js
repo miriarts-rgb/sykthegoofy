@@ -6,7 +6,21 @@
 
 
 
-  var state, draft = null, lang = "pt", cur = "BRL", filter = "all", galOrdem = "recentes";
+  var state, draft = null, lang = "pt", cur = "BRL", galOrdem = "recentes";
+  /* Filtro por família: dentro da mesma linha vale QUALQUER uma das
+     escolhidas, entre linhas vale TODAS. "Half body + Full body + Feral"
+     mostra meio-corpo ou corpo inteiro, desde que seja feral. */
+  var filtros = {tipo:[], quem:[]};
+  function limparFiltros(){ filtros = {tipo:[], quem:[]}; }
+  function temFiltro(){ return filtros.tipo.length || filtros.quem.length; }
+  function passaNoFiltro(g){
+    var tags = g.tags || [];
+    function casa(lista){
+      if(!lista.length) return true;
+      return lista.some(function(t){ return tags.indexOf(t) > -1; });
+    }
+    return casa(filtros.tipo) && casa(filtros.quem);
+  }
 
   /* O que está no HTML é a reserva: garante a página completa no primeiro
      instante e mantém o site de pé se o banco não responder. Logo em
@@ -293,8 +307,24 @@
         var b = document.createElement("button");
         b.type = "button"; b.className = "chipbtn";
         b.textContent = pick(t,"pt","en");
-        b.setAttribute("aria-pressed", String(t.id === filter));
-        b.addEventListener("click", function(){ filter = t.id; renderFilters(); renderGallery(); });
+
+        if(t.id === "all"){
+          /* "Tudo" não é uma etiqueta: é o botão de limpar */
+          b.setAttribute("aria-pressed", String(!temFiltro()));
+          b.addEventListener("click", function(){
+            limparFiltros(); renderFilters(); renderGallery();
+          });
+        } else {
+          var lista = filtros[par[0]];
+          var ligado = lista.indexOf(t.id) > -1;
+          b.setAttribute("aria-pressed", String(ligado));
+          b.addEventListener("click", function(){
+            var at = filtros[par[0]].indexOf(t.id);
+            if(at > -1) filtros[par[0]].splice(at, 1);
+            else filtros[par[0]].push(t.id);
+            renderFilters(); renderGallery();
+          });
+        }
         linha.appendChild(b);
       });
       box.appendChild(linha);
@@ -326,11 +356,29 @@
     box.innerHTML = "";
     /* a galeria já vem com a mais nova na frente (o painel põe no topo);
        este botão deixa ver as antigas primeiro quando alguém quiser */
-    var items = (S().gallery||[]).filter(function(g){
-      return filter === "all" || (g.tags||[]).indexOf(filter) > -1;
-    });
+    var items = (S().gallery||[]).filter(passaNoFiltro);
     if(galOrdem === "antigas") items = items.slice().reverse();
     if(!items.length){
+      /* com filtro ligado, a tela vazia é resultado de uma escolha:
+         oferece o caminho de volta em vez de só dizer que não há nada */
+      if(temFiltro()){
+        var vazio = document.createElement("div");
+        vazio.className = "gal-empty";
+        var t1 = document.createElement("p");
+        t1.style.cssText = "font-weight:700; margin-bottom:6px";
+        t1.textContent = lang==="en" ? "Nothing matches these filters."
+                                     : "Nada combina com esses filtros.";
+        var limpar = document.createElement("button");
+        limpar.type = "button"; limpar.className = "chipbtn";
+        limpar.style.marginTop = "10px";
+        limpar.textContent = lang==="en" ? "Clear filters" : "Limpar filtros";
+        limpar.addEventListener("click", function(){
+          limparFiltros(); renderFilters(); renderGallery();
+        });
+        vazio.appendChild(t1); vazio.appendChild(limpar);
+        box.appendChild(vazio);
+        return;
+      }
       box.innerHTML = '<div class="gal-empty"><p style="font-weight:700; margin-bottom:6px">' +
         (lang==="en" ? "No pieces here yet." : "Ainda não tem nada aqui.") + '</p><p style="font-size:.9rem">' +
         (lang==="en" ? "Artwork gets added through the panel." : "As artes entram pelo painel.") + '</p></div>';
