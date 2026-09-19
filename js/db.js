@@ -38,8 +38,9 @@ window.SykDB = (function(){
   }
 
   /* ---------- fila pública ----------
-     O visitante só enxerga type e stage: as outras colunas são
-     recusadas pelo banco. A posição é contada aqui mesmo. */
+     O visitante enxerga o nome escrito pela artista, o tipo e a etapa.
+     Cliente, valor, moeda e prazo são recusados pelo próprio banco.
+     A posição é contada aqui mesmo. */
   function publicQueue(){
     if(!sb) return Promise.resolve([]);
     return sb.from("commissions")
@@ -48,7 +49,9 @@ window.SykDB = (function(){
       .order("created_at", {ascending:true})
       .then(function(r){
         if(r.error) return [];
-        return (r.data||[]).map(function(c){ return {type:c.type, stage:c.stage}; });
+        return (r.data||[]).map(function(c){
+          return {label:c.label || "", type:c.type, stage:c.stage};
+        });
       });
   }
 
