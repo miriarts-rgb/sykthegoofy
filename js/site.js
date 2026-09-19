@@ -243,7 +243,14 @@
     if(y.image){
       var im = document.createElement(y.video ? "video" : "img");
       im.src = y.image;
-      if(y.video){ im.muted = true; im.loop = true; im.autoplay = true; im.playsInline = true; }
+      if(y.video){
+        im.muted = true; im.loop = true; im.autoplay = true; im.playsInline = true;
+        /* a base animada é decoração, não um player: sem controles, sem
+           botão de picture-in-picture e sem download no menu do navegador */
+        im.controls = false;
+        im.disablePictureInPicture = true;
+        im.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
+      }
       else { im.alt = y.name || ""; }
       art.appendChild(im);
     } else {
@@ -339,6 +346,9 @@
         media = document.createElement("video");
         media.src = g.src; media.muted = true; media.loop = true;
         media.playsInline = true; media.autoplay = true;
+        media.controls = false;
+        media.disablePictureInPicture = true;
+        media.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
         media.style.width = "100%"; media.style.height = "100%"; media.style.objectFit = "cover";
         var badge = document.createElement("span");
         badge.className = "play-badge"; badge.textContent = lang==="en" ? "animated" : "animada";

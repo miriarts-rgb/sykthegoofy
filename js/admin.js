@@ -475,7 +475,8 @@
         '<button class="iconbtn" type="button" title="remover">✕</button>';
       var thumb = document.createElement(g.video ? "video" : "img");
       thumb.src = g.src;
-      if(g.video){ thumb.muted = true; thumb.loop = true; thumb.autoplay = true; thumb.playsInline = true; }
+      if(g.video){ thumb.muted = true; thumb.loop = true; thumb.autoplay = true; thumb.playsInline = true;
+                   thumb.controls = false; thumb.disablePictureInPicture = true; }
       else { thumb.alt = ""; }
       thumb.style.cssText = "width:54px;height:54px;object-fit:cover;border:2px solid var(--line);border-radius:9px";
       row.insertBefore(thumb, row.firstChild);

@@ -403,7 +403,10 @@ section.ground{background:var(--ground)}
   box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column}
 .gal .frame{aspect-ratio:1/1; max-width:100%; background:var(--sun-pale);
   display:grid; place-items:center; border-bottom:3px solid var(--line); position:relative; overflow:hidden}
-.gal .frame img{width:100%; height:100%; object-fit:cover; display:block}
+/* video recebe o mesmo tratamento da imagem: sem isso ele aparece no
+   tamanho original e estoura a moldura */
+.gal .frame img,
+.gal .frame video{width:100%; height:100%; object-fit:cover; display:block}
 .gal figcaption{padding:12px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
 .tag{font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase;
   background:var(--sun-pale); border:1.5px solid var(--line); border-radius:999px; padding:3px 9px}
@@ -521,7 +524,8 @@ footer.site a{color:var(--link-on-cocoa)}
   border:3px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden}
 .ych-card .art{aspect-ratio:1/1; max-width:100%; background:var(--sun-pale); border-inline-end:3px solid var(--line);
   display:grid; place-items:center; overflow:hidden}
-.ych-card .art img{width:100%; height:100%; object-fit:cover}
+.ych-card .art img,
+.ych-card .art video{width:100%; height:100%; object-fit:cover; display:block}
 .ych-body{padding:26px 28px; display:flex; flex-direction:column; gap:12px; justify-content:center}
 .ych-body h3{font-size:1.6rem}
 .ych-meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px}
