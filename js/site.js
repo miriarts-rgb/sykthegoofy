@@ -59,7 +59,6 @@
       : s.open
         ? (lang==="en" ? free + " of " + s.slotsTotal + " slots free" : free + " de " + s.slotsTotal + " vagas livres")
         : (lang==="en" ? "Follow me to hear when they reopen" : "Me segue pra saber quando reabrir");
-    $("#status-updated").textContent = s.updated ? (lang==="en"?"updated ":"atualizado ") + s.updated : "";
     [["#slot-dots",true],["#hero-slots",false]].forEach(function(pair){
       var box = $(pair[0]); if(!box) return;
       box.innerHTML = "";
@@ -645,21 +644,20 @@
       layer.className = "seedfall"; layer.setAttribute("aria-hidden","true");
 
       var altura = sec.offsetHeight || 600;
-      var quantas = Math.max(8, Math.min(26, Math.round(altura / 95)));
+      var quantas = Math.max(22, Math.min(70, Math.round(altura / 34)));
 
       for(var i = 0; i < quantas; i++){
         var s = document.createElement("i");
         /* números primos diferentes espalham sem alinhar em fileira */
-        s.style.left = (3 + ((i * 37 + si * 17) % 93)) + "%";
-        s.style.top  = (4 + ((i * 53 + si * 29) % 91)) + "%";
-        var escala = 0.6 + ((i * 7 + si * 3) % 10) / 10;      /* 0,6 a 1,5 */
-        var giro   = ((i * 41 + si * 11) % 90) - 45;
-        s.style.width  = (6 * escala).toFixed(1) + "px";
-        s.style.height = (9 * escala).toFixed(1) + "px";
-        s.style.opacity = (0.22 + ((i * 3) % 5) * 0.07).toFixed(2);
-        s.style.setProperty("--giro", giro + "deg");
-        s.style.animationDelay = (-(i * 1.3 + si * 0.7)).toFixed(1) + "s";
-        s.style.animationDuration = (7.5 + (i % 4) * 1.4) + "s";
+        s.style.left = (2 + ((i * 37 + si * 17) % 95)) + "%";
+        s.style.top  = (3 + ((i * 53 + si * 29) % 93)) + "%";
+        /* todas do mesmo tamanho; o que varia é o caminho e o compasso */
+        s.style.setProperty("--giro", (((i * 41 + si * 11) % 90) - 45) + "deg");
+        s.style.setProperty("--sobe", (11 + (i % 5) * 4) + "px");
+        s.style.setProperty("--lado", (((i % 3) - 1) * 7) + "px");
+        s.style.opacity = (0.26 + ((i * 3) % 4) * 0.06).toFixed(2);
+        s.style.animationDelay = (-(i * 0.6 + si * 0.7)).toFixed(1) + "s";
+        s.style.animationDuration = (5.5 + (i % 6) * 0.9) + "s";
         layer.appendChild(s);
       }
       sec.insertBefore(layer, sec.firstChild);

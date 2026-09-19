@@ -98,11 +98,17 @@ img{max-width:100%}
   background:var(--seed); opacity:.42;
   animation:sy-bob 9s ease-in-out infinite;
 }
-/* cada semente nasce com o próprio giro e volta para ele: sem isso
-   todas balançariam no mesmo ângulo e o padrão apareceria */
+/* Todas do mesmo tamanho: o que muda é o caminho. Sobem, derivam para o
+   lado e voltam, cada uma na sua altura e compasso — assim a repetição
+   não aparece mesmo com muitas na tela. */
 @keyframes sy-bob{
-  0%,100%{transform:translateY(0) rotate(var(--giro,0deg))}
-  50%    {transform:translateY(-14px) rotate(calc(var(--giro,0deg) + 16deg))}
+  0%,100%{ transform:translate(0,0) rotate(var(--giro,0deg)) }
+  30%    { transform:translate(calc(var(--lado,0px) * .6), calc(var(--sobe,14px) * -.55))
+                     rotate(calc(var(--giro,0deg) + 10deg)) }
+  55%    { transform:translate(var(--lado,0px), calc(var(--sobe,14px) * -1))
+                     rotate(calc(var(--giro,0deg) + 20deg)) }
+  80%    { transform:translate(calc(var(--lado,0px) * -.4), calc(var(--sobe,14px) * -.4))
+                     rotate(calc(var(--giro,0deg) + 6deg)) }
 }
 section{position:relative}
 section > .wrap{position:relative; z-index:1}
