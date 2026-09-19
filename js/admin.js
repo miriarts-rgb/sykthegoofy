@@ -145,7 +145,14 @@
      runtime não existe — então o botão troca de função: gera o index.html já
      atualizado para você baixar e trocar na pasta. O trabalho nunca fica preso. */
   $("#adm-save").addEventListener("click", function(){
-    if(!draft){ $("#adm-state").textContent = "nada para salvar"; return; }
+    /* "nada para salvar" sozinho fazia parecer que a edição tinha se
+       perdido. O ateliê grava campo a campo, direto: só preço, galeria,
+       vagas e texto passam por este botão. */
+    if(!draft){
+      $("#adm-state").textContent =
+        "nada pendente — o ateliê já salva sozinho a cada campo";
+      return;
+    }
     var btn = this;
     btn.disabled = true;
     $("#adm-state").textContent = "salvando…";
