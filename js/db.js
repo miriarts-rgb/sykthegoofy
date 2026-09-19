@@ -100,6 +100,30 @@ window.SykDB = (function(){
       .then(function(r){ if(r.error) throw r.error; return true; });
   }
 
+  /* ---------- arquivos da galeria ----------
+     A arte vai para o armazenamento e o banco guarda só o endereço.
+     Antes a imagem virava texto dentro do próprio registro, o que
+     fazia cada visitante baixar a galeria inteira para abrir a página. */
+  var BUCKET = "galeria";
+
+  function uploadArt(blob, ext){
+    if(!sb) return offline();
+    var name = Date.now().toString(36) + "-" +
+               Math.random().toString(36).slice(2, 8) + "." + (ext || "jpg");
+    return sb.storage.from(BUCKET)
+      .upload(name, blob, {cacheControl:"31536000", upsert:false})
+      .then(function(r){
+        if(r.error) throw r.error;
+        var pub = sb.storage.from(BUCKET).getPublicUrl(name);
+        return {path:name, url:pub.data.publicUrl};
+      });
+  }
+  function deleteArt(path){
+    if(!sb || !path) return Promise.resolve();
+    return sb.storage.from(BUCKET).remove([path]).then(function(){ return true; })
+      .catch(function(){ return false; });   /* arquivo já sumido não é erro */
+  }
+
   /* ---------- login ---------- */
   function signIn(email, password){
     if(!sb) return offline();
@@ -116,6 +140,7 @@ window.SykDB = (function(){
   return {
     ready:ready,
     loadContent:loadContent, saveContent:saveContent, publicQueue:publicQueue,
+    uploadArt:uploadArt, deleteArt:deleteArt,
     createOrder:createOrder, listOrders:listOrders,
     setOrderStatus:setOrderStatus, deleteOrder:deleteOrder,
     listCommissions:listCommissions, addCommission:addCommission,

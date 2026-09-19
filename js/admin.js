@@ -485,18 +485,22 @@
         markDirty();
       });
       row.querySelector(".iconbtn").addEventListener("click", function(){
-        startDraft(); draft.gallery.splice(i,1); markDirty(); renderAdmin();
+        startDraft();
+        var removed = draft.gallery.splice(i,1)[0];
+        /* tira o arquivo junto, senão fica ocupando espaço para sempre.
+           As 16 artes antigas moram no repositório e não têm path: essas
+           só saem da lista. */
+        if(removed && removed.path) DB.deleteArt(removed.path);
+        markDirty(); renderAdmin();
       });
       gb.appendChild(row);
     });
-    /* peso real da página: o que está embutido conta, o que é arquivo não */
     var g = s.gallery || [];
     var embedded = g.filter(function(x){ return /^data:/.test(x.src||""); });
-    var bytes = embedded.reduce(function(n,x){ return n + (x.src||"").length; }, 0);
     var el = $("#adm-gal-size");
-    el.textContent = g.length + " arquivo(s)" +
-      (embedded.length ? " · " + embedded.length + " embutida(s), ~" + (bytes/1048576).toFixed(2) + " MB na página" : " · todas em arquivo");
-    el.style.color = bytes > 8*1048576 ? "var(--stop)" : "";
+    el.textContent = g.length + " arte(s)" +
+      (embedded.length ? " · " + embedded.length + " ainda embutida(s): reenvie para aliviar a página" : "");
+    el.style.color = embedded.length ? "var(--warn)" : "";
 
     $("#adm-tos").value = (s.tos || []).join("\n");
     $("#adm-yes").value = (s.drawYes || []).join("\n");
@@ -519,7 +523,11 @@
      no máximo 1400px no maior lado, JPEG 82%. Vídeo não dá para reduzir
      assim, então passa direto e o painel avisa se estiver grande. */
   var MAX_PX = 1400, JPEG_Q = 0.82;
-  function shrinkImage(file){
+
+  /* Reduz no navegador e devolve um arquivo binário, não texto. Uma arte
+     de 10 MB sai daqui com algumas centenas de KB, e vai para o
+     armazenamento em vez de engordar o registro do banco. */
+  function shrinkToBlob(file){
     return new Promise(function(resolve, reject){
       var fr = new FileReader();
       fr.onerror = reject;
@@ -529,15 +537,16 @@
         img.onload = function(){
           var scale = Math.min(1, MAX_PX / Math.max(img.width, img.height));
           var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
-          try{
-            var cv = document.createElement("canvas");
-            cv.width = w; cv.height = h;
-            var cx = cv.getContext("2d");
-            cx.fillStyle = "#1E1410";           /* transparência vira o fundo do site */
-            cx.fillRect(0, 0, w, h);
-            cx.drawImage(img, 0, 0, w, h);
-            resolve({src:cv.toDataURL("image/jpeg", JPEG_Q), w:w, h:h});
-          }catch(e){ resolve({src:fr.result, w:img.width, h:img.height}); }
+          var cv = document.createElement("canvas");
+          cv.width = w; cv.height = h;
+          var cx = cv.getContext("2d");
+          cx.fillStyle = "#1E1410";      /* transparência vira o fundo do site */
+          cx.fillRect(0, 0, w, h);
+          cx.drawImage(img, 0, 0, w, h);
+          cv.toBlob(function(blob){
+            if(blob) resolve({blob:blob, ext:"jpg"});
+            else reject(new Error("não consegui converter a imagem"));
+          }, "image/jpeg", JPEG_Q);
         };
         img.src = fr.result;
       };
@@ -550,27 +559,33 @@
     if(!files.length) return;
     startDraft();
     draft.gallery = draft.gallery || [];
-    var msg = $("#adm-gal-size");
-    msg.textContent = "preparando " + files.length + " arquivo(s)…";
-    var jobs = files.map(function(file){
-      if(/^video\//.test(file.type)){
-        return new Promise(function(res){
-          var fr = new FileReader();
-          fr.onload = function(){ res({src:fr.result, video:true}); };
-          fr.onerror = function(){ res(null); };
-          fr.readAsDataURL(file);
-        });
-      }
-      return shrinkImage(file).catch(function(){ return null; });
-    });
-    Promise.all(jobs).then(function(items){
-      items.forEach(function(it){
-        if(!it) return;
-        var entry = {src:it.src, alt:"", tags:["furry"]};
-        if(it.video) entry.video = true;
-        draft.gallery.push(entry);
+    var msg = $("#adm-gal-size"), done = 0, failed = 0;
+    msg.textContent = "enviando 0 de " + files.length + "…";
+
+    /* um de cada vez: mais lento, porém o progresso é real e uma arte
+       que falhe não derruba o envio das outras */
+    files.reduce(function(chain, file){
+      return chain.then(function(){
+        var isVideo = /^video\//.test(file.type);
+        var prep = isVideo
+          ? Promise.resolve({blob:file, ext:(file.name.split(".").pop() || "mp4").toLowerCase()})
+          : shrinkToBlob(file);
+        return prep
+          .then(function(p){ return DB.uploadArt(p.blob, p.ext); })
+          .then(function(up){
+            var entry = {src:up.url, path:up.path, alt:"", tags:["furry"]};
+            if(isVideo) entry.video = true;
+            draft.gallery.push(entry);
+            done++;
+          })
+          .catch(function(){ failed++; })
+          .then(function(){
+            msg.textContent = "enviando " + (done + failed) + " de " + files.length + "…";
+          });
       });
+    }, Promise.resolve()).then(function(){
       markDirty(); renderAdmin();
+      if(failed) $("#adm-state").textContent = failed + " arquivo(s) não subiram";
     });
     this.value = "";
   });
