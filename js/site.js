@@ -249,6 +249,7 @@
            botão de picture-in-picture e sem download no menu do navegador */
         im.controls = false;
         im.disablePictureInPicture = true;
+        im.setAttribute("disablepictureinpicture", "");
         im.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
       }
       else { im.alt = y.name || ""; }
@@ -348,6 +349,7 @@
         media.playsInline = true; media.autoplay = true;
         media.controls = false;
         media.disablePictureInPicture = true;
+        media.setAttribute("disablepictureinpicture", "");
         media.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
         media.style.width = "100%"; media.style.height = "100%"; media.style.objectFit = "cover";
         var badge = document.createElement("span");

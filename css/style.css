@@ -526,6 +526,17 @@ footer.site a{color:var(--link-on-cocoa)}
   display:grid; place-items:center; overflow:hidden}
 .ych-card .art img,
 .ych-card .art video{width:100%; height:100%; object-fit:cover; display:block}
+/* O Chrome desenha o próprio overlay de vídeo ao passar o mouse. Como a
+   base animada é decoração e não tem nada para controlar, o vídeo deixa
+   de receber o ponteiro — sem hover no elemento, não há overlay. */
+.ych-card .art video,
+.gal .frame video{pointer-events:none}
+/* só nas miniaturas: no lightbox o vídeo abre grande e ali os controles
+   fazem falta, então aquele fica de fora desta regra */
+.ych-card .art video::-webkit-media-controls,
+.ych-card .art video::-webkit-media-controls-enclosure,
+.gal .frame video::-webkit-media-controls,
+.gal .frame video::-webkit-media-controls-enclosure{display:none !important}
 .ych-body{padding:26px 28px; display:flex; flex-direction:column; gap:12px; justify-content:center}
 .ych-body h3{font-size:1.6rem}
 .ych-meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:4px}
