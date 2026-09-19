@@ -1,91 +1,101 @@
 /* ============================================================
    admin.js — painel da artista (página admin.html)
 
-   Como a publicação funciona aqui:
-   o conteúdo do site mora no bloco <script id="app-state"> DENTRO do
-   index.html. Esta página não é o index, então ela BAIXA o index.html,
-   troca aquele bloco pelo estado novo e publica o documento inteiro.
-   Por isso admin.html precisa ser servido por http (no site publicado,
-   ou local com um servidor). Abrindo por file:// o navegador bloqueia a
-   leitura do index.html — aí o painel avisa e segue gerenciando só o
-   ateliê, que vive no localStorage e não depende disso.
+   Tudo vem do banco (Supabase) e volta para ele: conteúdo do site,
+   pedidos e ateliê. Não há mais arquivo para baixar nem publicar, e o
+   painel funciona igual no computador, no celular ou em qualquer lugar
+   com internet.
+
+   Quem pode o quê é decidido pelo servidor, não por este código. Sem
+   sessão válida o banco não devolve pedido nem comissão — mexer no
+   JavaScript daqui não muda isso.
    ============================================================ */
 (function(){
   "use strict";
   var C = window.SykCore;
-  var $ = C.$, $$ = C.$$, Studio = C.Studio, STAGES = C.STAGES;
+  var $ = C.$, $$ = C.$$, STAGES = C.STAGES;
+  var DB = window.SykDB;
 
-  var state = null, draft = null, indexHtml = null, canPublish = false;
+  var state = null, draft = null;
   function S(){ return draft || state || {}; }
   function startDraft(){ if(!draft) draft = C.clone(state || {}); }
-  function markDirty(){ $("#adm-state").textContent = "alterações não publicadas"; }
+  function markDirty(){ $("#adm-state").textContent = "alterações não salvas"; }
+  function showErr(e){ $("#adm-state").textContent = "erro: " + ((e && e.message) || e); }
   function pick(o,a,b){ return o[a] || o[b] || ""; }   /* painel roda em PT */
 
-  /* ---------- login ---------- */
-  var platformEditor = false;
-  function currentHash(){ return (S().admPass) || C.DEFAULT_HASH; }
-  function isLogged(){
-    if(platformEditor) return true;
-    try{ return localStorage.getItem(C.PASS_KEY) === currentHash(); }catch(e){ return false; }
-  }
+  /* ---------- login ----------
+     Agora é o Supabase quem valida: email e senha conferidos no servidor.
+     A senha antiga do site foi removida — ela era só um portão visual, e
+     quem abrisse o código passava por ela. Aqui, sem sessão válida o banco
+     simplesmente não devolve pedido nem comissão, independente do que o
+     navegador tente. */
   function showPanel(){
     $("#gate").hidden = true;
     $("#adm-wrap").hidden = false;
-    $("#adm-who").textContent = platformEditor ? "editor da plataforma" : "senha";
     $("#admin-logout").hidden = false;
-    /* o botão diz o que de fato vai acontecer neste modo */
-    $("#adm-save").textContent = isHosted ? "Publicar alterações" : "Baixar index.html atualizado";
+    $("#adm-save").textContent = "Salvar no site";
+    DB.currentUser().then(function(u){
+      $("#adm-who").textContent = u ? u.email : "";
+    });
     var hint = $("#adm-mode");
-    if(hint){
-      hint.textContent = isHosted
-        ? "Você está no site publicado: salvar aqui publica para todo mundo na hora."
-        : "Você está rodando local: salvar gera o index.html novo para você trocar na pasta. "
-        + "Publicar para todo mundo só acontece pelo site publicado.";
-    }
+    if(hint) hint.textContent = "Salvar grava no banco: o site mostra na hora, para todo mundo.";
     renderAdmin();
   }
   $("#login-form").addEventListener("submit", function(e){
     e.preventDefault();
-    if(C.hashPwd($("#login-pass").value) !== currentHash()){
-      $("#login-err").hidden = false;
-      $("#login-pass").select();
-      return;
-    }
-    try{ localStorage.setItem(C.PASS_KEY, currentHash()); }catch(err){}
-    showPanel();
+    var err = $("#login-err"), btn = $("#login-go");
+    err.hidden = true; btn.disabled = true; btn.textContent = "entrando…";
+    DB.signIn($("#login-email").value.trim(), $("#login-pass").value)
+      .then(function(){ return loadAll(); })
+      .then(function(){ showPanel(); })
+      .catch(function(ex){
+        var m = (ex && ex.message) || "";
+        err.textContent = /invalid login/i.test(m)
+          ? "Email ou senha não conferem."
+          : /email not confirmed/i.test(m)
+            ? "Esta conta ainda não foi confirmada. Marque “Auto Confirm User” no Supabase."
+            : "Não consegui entrar: " + m;
+        err.hidden = false;
+        $("#login-pass").select();
+      })
+      .then(function(){ btn.disabled = false; btn.textContent = "Entrar"; });
   });
   $("#admin-logout").addEventListener("click", function(){
-    try{ localStorage.removeItem(C.PASS_KEY); }catch(e){}
-    location.reload();
+    DB.signOut().then(function(){ location.reload(); });
   });
 
-  /* ---------- carregar o estado do site ---------- */
+  /* ---------- carregar tudo do banco ----------
+     Some a antiga dependência de ler o index.html: não há mais arquivo
+     para baixar nem trocar, e o painel funciona igual aberto por
+     localhost, pelo site publicado ou pelo celular. */
+  var orders = [], commissions = [];
+
+  function loadAll(){
+    return Promise.all([DB.loadContent(), DB.listOrders(), DB.listCommissions()])
+      .then(function(r){
+        state = r[0] || {};
+        orders = r[1] || [];
+        commissions = r[2] || [];
+      });
+  }
+
   function boot(){
-    Studio.load();
-    fetch("index.html", {cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); })
-      .then(function(txt){
-        indexHtml = txt;
-        var doc = new DOMParser().parseFromString(txt, "text/html");
-        state = C.readState(doc) || {};
-        canPublish = true;
+    if(!DB.ready){
+      $("#gate").hidden = true;
+      var w = $("#adm-offline");
+      w.hidden = false;
+      w.innerHTML = "<b>Banco não configurado.</b> Preencha <code>js/config.js</code> com a " +
+        "Project URL e a chave publishable do Supabase.";
+      return;
+    }
+    DB.currentUser()
+      .then(function(user){
+        if(!user) throw new Error("sem sessão");
+        return loadAll().then(showPanel);
       })
       .catch(function(){
-        /* sem acesso ao index: só o ateliê funciona */
-        state = {};
-        canPublish = false;
-        var w = $("#adm-offline");
-        w.hidden = false;
-        w.innerHTML = "<b>O painel abriu pela metade.</b> Pedidos e comissões funcionam; " +
-          "preços, galeria, YCH, textos e o botão de publicar estão desligados.<br><br>" +
-          "<b>Por quê:</b> aberto por <code>file://</code> (dois cliques no arquivo), o navegador " +
-          "proíbe esta página de ler o <code>index.html</code> — e é de lá que vem o conteúdo do site.<br><br>" +
-          "<b>Como resolver:</b> feche esta aba, dê dois cliques em <b>servidor.cmd</b> na pasta do site " +
-          "e abra <b>http://localhost:8080/admin.html</b>. Ou use o painel pelo site publicado.";
-      })
-      .then(function(){
-        if(isLogged()) showPanel();
-        else $("#login-pass").focus();
+        $("#gate").hidden = false;
+        $("#login-email").focus();
       });
   }
 
@@ -94,53 +104,16 @@
      o runtime dela que escreve a nova versão. Rodando em localhost esse
      runtime não existe — então o botão troca de função: gera o index.html já
      atualizado para você baixar e trocar na pasta. O trabalho nunca fica preso. */
-  var isHosted = !!(window.claude && window.claude.use);
-
-  function buildNextIndex(){
-    draft.updated = new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
-    draft.queue = C.publicQueue();
-    var next = indexHtml.replace(
-      /(<script id="app-state" type="application\/json">)[\s\S]*?(<\/script>)/,
-      function(_, a, b){ return a + JSON.stringify(draft).replace(/<\//g,"<\\/") + b; }
-    );
-    return next === indexHtml ? null : next;
-  }
-
   $("#adm-save").addEventListener("click", function(){
-    if(!canPublish){ $("#adm-state").textContent = "salvar indisponível aqui"; return; }
     if(!draft){ $("#adm-state").textContent = "nada para salvar"; return; }
     var btn = this;
-    var next = buildNextIndex();
-    if(!next){ $("#adm-state").textContent = "não achei o bloco de estado no index"; return; }
-
-    if(!isHosted){
-      /* modo local: entrega o arquivo pronto */
-      try{
-        var blob = new Blob([next], {type:"text/html"});
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "index.html";
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
-        indexHtml = next; state = draft; draft = null;
-        $("#adm-state").textContent = "index.html baixado — troque o da pasta";
-        renderAdmin();
-      }catch(e){
-        $("#adm-state").textContent = "não consegui gerar o arquivo: " + e.message;
-      }
-      return;
-    }
-
     btn.disabled = true;
-    $("#adm-state").textContent = "publicando…";
-    Promise.resolve(window.claude.use("artifact"))
-      .then(function(artifact){
-        if(!artifact) throw new Error("esta conta não tem permissão de edição neste site");
-        return artifact.publish(next);
-      })
+    $("#adm-state").textContent = "salvando…";
+    draft.updated = new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
+    DB.saveContent(draft)
       .then(function(){
-        indexHtml = next; state = draft; draft = null;
-        $("#adm-state").textContent = "publicado ✓";
+        state = draft; draft = null;
+        $("#adm-state").textContent = "salvo ✓ o site já mostra";
         renderAdmin();
       })
       .catch(function(err){
@@ -168,15 +141,15 @@
     return p ? (p.pt || p.en) : "Comissão";
   }
   function renderOrders(){
-    var all = Studio.d.orders || [];
+    var all = orders || [];
     var novos = all.filter(function(o){ return o.status === "novo"; }).length;
     var badge = $("#tab-badge");
     badge.hidden = !novos;
     badge.textContent = novos ? "(" + novos + ")" : "";
 
-    $("#orders-note").innerHTML = "<b>Como os pedidos chegam aqui.</b> O formulário do site grava o pedido " +
-      "no navegador de quem preencheu. Você vê os que forem feitos <b>neste mesmo navegador</b>. " +
-      "O que sempre chega é a mensagem que o cliente copia e manda no Telegram ou Discord.";
+    $("#orders-note").innerHTML = "<b>Pedidos chegam aqui automaticamente.</b> Quem preenche o " +
+      "formulário do site cai nesta lista, de qualquer computador ou celular. " +
+      "Aceitar um pedido cria a comissão no ateliê já com valor e prazo.";
 
     $$("#orders-filter [data-of]").forEach(function(b){
       b.setAttribute("aria-pressed", String(b.getAttribute("data-of") === orderFilter));
@@ -184,7 +157,7 @@
 
     var box = $("#orders-list"); box.innerHTML = "";
     var list = all.filter(function(o){ return o.status === orderFilter; })
-                  .sort(function(a,b){ return b.at - a.at; });
+                  ;
     if(!list.length){
       box.innerHTML = '<p class="mini">Nenhum pedido ' +
         ({novo:"novo", aceito:"aceito", recusado:"recusado"}[orderFilter]) + ' por aqui.</p>';
@@ -193,7 +166,7 @@
     list.forEach(function(o){
       var card = document.createElement("div");
       card.className = "kan-card";
-      var when = new Date(o.at).toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+      var when = new Date(o.created_at).toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
       var det = [typeName(o.type), o.finish === "flat" ? "flat" : "rendered",
                  o.chars > 1 ? o.chars + " personagens" : "1 personagem",
                  C.BGLBL[o.bg] || "", o.rating === "nsfw" ? "NSFW" : "SFW"].filter(Boolean).join(" · ");
@@ -212,7 +185,7 @@
       if(o.estimate) card.querySelector(".pill.paid-half").textContent =
         (o.cur === "USD" ? "$" : "R$") + o.estimate;
       card.querySelector(".what").textContent = det;
-      card.querySelectorAll("div")[3].textContent = o.desc || "";
+      card.querySelectorAll("div")[3].textContent = o.descricao || "";
       card.querySelector(".mini").textContent =
         (o.refs ? "refs: " + o.refs : "sem referências") + (o.deadline ? " · precisa até " + o.deadline : "");
 
@@ -223,22 +196,35 @@
         b.addEventListener("click", fn); acts.appendChild(b);
       }
       if(o.status === "novo"){
+        /* aceitar: marca o pedido e cria a comissão, os dois no banco */
         act("aceitar", function(){
-          o.status = "aceito";
-          Studio.d.commissions.push({id:"c"+Date.now().toString(36), who:o.who, type:o.type,
-            stage:"wait", paid:"no", value:o.estimate != null ? o.estimate : null, deadline:o.deadline || ""});
-          Studio.save(); renderOrders(); renderStudio(); touchQueue();
+          DB.setOrderStatus(o.id, "aceito")
+            .then(function(){
+              return DB.addCommission({
+                who:o.who, type:o.type, stage:"wait", paid:"no",
+                value:o.estimate != null ? o.estimate : null,
+                deadline:o.deadline || null
+              });
+            })
+            .then(function(c){
+              o.status = "aceito";
+              commissions.push(c);
+              renderOrders(); renderStudio();
+            })
+            .catch(showErr);
         });
-        act("recusar", function(){ o.status = "recusado"; Studio.save(); renderOrders(); });
+        act("recusar", function(){ DB.setOrderStatus(o.id,"recusado").then(function(){ o.status="recusado"; renderOrders(); }).catch(showErr); });
       } else {
-        act("voltar pra novos", function(){ o.status = "novo"; Studio.save(); renderOrders(); });
+        act("voltar pra novos", function(){ DB.setOrderStatus(o.id,"novo").then(function(){ o.status="novo"; renderOrders(); }).catch(showErr); });
       }
       act("copiar pedido", function(){
         if(navigator.clipboard) navigator.clipboard.writeText(o.message || "");
       });
       card.querySelector(".iconbtn").addEventListener("click", function(){
-        Studio.d.orders = Studio.d.orders.filter(function(x){ return x.id !== o.id; });
-        Studio.save(); renderOrders();
+        DB.deleteOrder(o.id).then(function(){
+          orders = orders.filter(function(x){ return x.id !== o.id; });
+          renderOrders();
+        }).catch(showErr);
       });
       box.appendChild(card);
     });
@@ -248,9 +234,23 @@
   });
 
   /* ---------- ateliê ---------- */
-  function touchQueue(){
-    if(!canPublish) return;
-    startDraft(); draft.queue = C.publicQueue(); markDirty();
+  /* a fila do site sai direto da tabela de comissões, então não há mais
+     nada a sincronizar: mudar a etapa aqui já muda o site */
+  function saveField(c, patch){
+    Object.keys(patch).forEach(function(k){ c[k] = patch[k]; });
+    DB.updateCommission(c.id, patch).catch(showErr);
+  }
+  /* digitar dispara muitos eventos: espera a pessoa parar antes de gravar */
+  function debounced(c, key){
+    var t = null;
+    return function(value){
+      c[key] = value;
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var patch = {}; patch[key] = value;
+        DB.updateCommission(c.id, patch).catch(showErr);
+      }, 600);
+    };
   }
   function renderStudio(){
     var m = C.metrics(), kb = $("#adm-kpis");
@@ -262,7 +262,7 @@
               : '<div class="kpi"><b>0</b><span>atrasadas</span></div>');
 
     var box = $("#adm-kan"); box.innerHTML = "";
-    var cs = Studio.d.commissions;
+    var cs = commissions;
     if(!cs.length){
       box.innerHTML = '<p class="mini">Nenhuma comissão registrada. Clique em “nova comissão” quando fechar um trabalho.</p>';
       return;
@@ -303,36 +303,36 @@
       sels[1].value = c.stage || "wait"; sels[2].value = c.paid || "no";
       ins[1].value = c.value != null ? c.value : ""; ins[2].value = c.deadline || "";
 
-      ins[0].addEventListener("input", function(){ c.who = ins[0].value; Studio.save(); });
-      typeSel.addEventListener("change", function(){ c.type = typeSel.value; Studio.save(); renderStudio(); });
-      sels[1].addEventListener("change", function(){ c.stage = sels[1].value; Studio.save(); renderStudio(); touchQueue(); });
-      sels[2].addEventListener("change", function(){ c.paid = sels[2].value; Studio.save(); renderStudio(); });
-      ins[1].addEventListener("input", function(){ c.value = ins[1].value===""?null:+ins[1].value; Studio.save(); renderStudio(); });
-      ins[2].addEventListener("input", function(){ c.deadline = ins[2].value; Studio.save(); renderStudio(); });
+      var setWho = debounced(c, "who"), setValue = debounced(c, "value");
+      ins[0].addEventListener("input", function(){ setWho(ins[0].value); });
+      ins[1].addEventListener("input", function(){
+        setValue(ins[1].value === "" ? null : +ins[1].value);
+      });
+      typeSel.addEventListener("change", function(){ saveField(c, {type:typeSel.value}); renderStudio(); });
+      sels[1].addEventListener("change", function(){ saveField(c, {stage:sels[1].value}); renderStudio(); });
+      sels[2].addEventListener("change", function(){ saveField(c, {paid:sels[2].value}); renderStudio(); });
+      ins[2].addEventListener("change", function(){
+        saveField(c, {deadline:ins[2].value || null}); renderStudio();
+      });
       card.querySelector(".iconbtn").addEventListener("click", function(){
-        Studio.d.commissions.splice(i,1); Studio.save(); renderStudio(); touchQueue();
+        DB.deleteCommission(c.id).then(function(){
+          commissions.splice(i,1); renderStudio();
+        }).catch(showErr);
       });
       box.appendChild(card);
     });
   }
   $("#adm-kan-add").addEventListener("click", function(){
     var first = (S().prices||[])[0];
-    Studio.d.commissions.push({id:"c"+Date.now().toString(36), who:"", type:first?first.id:"",
-      stage:"wait", paid:"no", value:null, deadline:""});
-    Studio.save(); renderStudio(); touchQueue();
+    DB.addCommission({who:"", type:first?first.id:"", stage:"wait", paid:"no",
+                      value:null, deadline:null})
+      .then(function(c){ commissions.push(c); renderStudio(); })
+      .catch(showErr);
   });
 
   /* ---------- conteúdo do site ---------- */
   function renderAdmin(){
     renderOrders(); renderStudio();
-    if(!canPublish){
-      $("#adm-save").disabled = true;
-      $$(".adm-pane").forEach(function(p){
-        var t = p.getAttribute("data-pane");
-        if(t !== "pedidos" && t !== "studio" && t !== "backup") p.style.opacity = ".45";
-      });
-      return;
-    }
     var s = S();
 
     $("#adm-open-toggle").textContent = s.open ? "✓ Abertas" : "✕ Fechadas";
@@ -536,18 +536,6 @@
   }
   bindText("#adm-tos","tos"); bindText("#adm-yes","drawYes"); bindText("#adm-no","drawNo");
 
-  /* ---------- senha ---------- */
-  $("#adm-pass-save").addEventListener("click", function(){
-    var a = $("#adm-pass1").value, b = $("#adm-pass2").value, msg = $("#adm-pass-msg");
-    if(a.length < 4){ msg.textContent = "Use pelo menos 4 caracteres."; return; }
-    if(a !== b){ msg.textContent = "As duas senhas não batem."; return; }
-    if(!canPublish){ msg.textContent = "Sem acesso ao index.html, não dá para gravar a senha nova."; return; }
-    startDraft(); draft.admPass = C.hashPwd(a); markDirty();
-    try{ localStorage.setItem(C.PASS_KEY, draft.admPass); }catch(e){}
-    $("#adm-pass1").value = ""; $("#adm-pass2").value = "";
-    msg.textContent = "Senha trocada. Clique em “Publicar alterações” para valer no site.";
-  });
-
   /* ---------- backup ---------- */
   $("#adm-export").addEventListener("click", function(){
     var s = S();
@@ -556,7 +544,7 @@
       site:{prices:s.prices, extras:s.extras, gallery:s.gallery, ych:s.ych,
             tos:s.tos, drawYes:s.drawYes, drawNo:s.drawNo,
             open:s.open, slotsTotal:s.slotsTotal},
-      studio:Studio.d
+      studio:{commissions:commissions, orders:orders}
     }, null, 2);
     var ta = $("#adm-backup-text"); ta.hidden = false; ta.value = payload;
     var done = function(){ $("#adm-backup-state").textContent = "copiado — cole num arquivo .json e guarde"; };
@@ -569,17 +557,16 @@
     fr.onload = function(){
       try{
         var p = JSON.parse(fr.result);
-        if(p.studio && p.studio.commissions){
-          Studio.d = {commissions:p.studio.commissions||[], orders:p.studio.orders||[]};
-          Studio.save();
-        }
-        if(p.site && canPublish){
+        /* só o conteúdo do site volta pelo backup: pedidos e comissões
+           vivem no banco e reimportá-los criaria duplicatas */
+        if(p.site){
           startDraft();
           Object.keys(p.site).forEach(function(k){ if(p.site[k] !== undefined) draft[k] = p.site[k]; });
-          draft.queue = C.publicQueue();
           markDirty();
+          $("#adm-backup-state").textContent = "conteúdo importado — confira e clique em salvar";
+        } else {
+          $("#adm-backup-state").textContent = "esse arquivo não tem conteúdo de site";
         }
-        $("#adm-backup-state").textContent = "importado — confira e clique em publicar";
         renderAdmin();
       }catch(e){
         $("#adm-backup-state").textContent = "não consegui ler esse arquivo: " + e.message;
@@ -587,16 +574,6 @@
     };
     fr.readAsText(f); this.value = "";
   });
-
-  /* quem já pode editar na plataforma entra sem senha */
-  Promise.resolve(window.claude && window.claude.use ? window.claude.use("user") : null)
-    .then(function(user){
-      if(user && typeof user.canEdit === "function" && user.canEdit()){
-        platformEditor = true;
-        if(state !== null && $("#adm-wrap").hidden) showPanel();
-      }
-    })
-    .catch(function(){});
 
   boot();
 })();

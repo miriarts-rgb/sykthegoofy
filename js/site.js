@@ -1,13 +1,16 @@
 (function(){
   "use strict";
   var C = window.SykCore;
-  var $ = C.$, $$ = C.$$, Studio = C.Studio, STAGES = C.STAGES, TAGS = C.TAGS;
+  var $ = C.$, $$ = C.$$, STAGES = C.STAGES, TAGS = C.TAGS;
 
 
 
 
   var state, draft = null, lang = "pt", cur = "BRL", filter = "all";
 
+  /* O que está no HTML é a reserva: garante a página completa no primeiro
+     instante e mantém o site de pé se o banco não responder. Logo em
+     seguida o conteúdo do banco entra por cima, se houver. */
   state = C.readState(document) || {open:false,slotsTotal:5,prices:[],queue:[],gallery:[]};
   function S(){ return draft || state; }
 
@@ -428,11 +431,22 @@
       setTimeout(function(){ $("#f-name").style.borderColor = ""; }, 1800);
       return;
     }
-    var q = quote();
-    Studio.addOrder({
-      id:"o" + Date.now().toString(36),
-      at:Date.now(),
-      status:"novo",
+    var q = quote(), btn = this, box = $("#sent-box");
+    var DB = window.SykDB;
+    if(!DB || !DB.ready){
+      box.hidden = false;
+      box.innerHTML = '<div class="estimate" style="border-style:solid"><p style="font-weight:700">' +
+        (L ? "Couldn't send from here." : "Não consegui enviar por aqui.") + '</p>' +
+        '<p style="font-size:.9rem; color:var(--cocoa-soft); margin-top:6px">' +
+        (L ? "Use “Copy order” and send it on Telegram or Discord."
+           : "Use “Copiar pedido” e mande no Telegram ou Discord.") + '</p></div>';
+      return;
+    }
+    btn.disabled = true;
+    var was = btn.textContent;
+    btn.textContent = L ? "sending…" : "enviando…";
+
+    DB.createOrder({
       who:$("#f-name").value.trim(),
       contact:$("#f-contact").value,
       type:$("#f-type").value,
@@ -442,21 +456,30 @@
       rating:$("#f-rating").value,
       cur:cur,
       estimate:q ? q.total : null,
-      deadline:$("#f-deadline").value,
+      deadline:$("#f-deadline").value || null,
       refs:$("#f-refs").value,
       desc:$("#f-desc").value,
       message:$("#summary").textContent
+    }).then(function(){
+      box.hidden = false;
+      box.innerHTML = '<div class="estimate" style="border-style:solid"><p class="eyebrow">' +
+        (L?"Order sent":"Pedido enviado") + '</p><p style="font-weight:700; margin-top:8px">' +
+        (L ? "It's in Syk's panel now." : "Ele já está no painel da Syk.") + '</p>' +
+        '<p style="font-size:.9rem; color:var(--cocoa-soft); margin-top:6px">' +
+        (L ? "She'll get back to you on the channel you picked. Want to be sure? Copy the order and send it there too."
+           : "Ela te responde pelo canal que você escolheu. Quer garantir? Copie o pedido e mande lá também.") + '</p></div>';
+      box.scrollIntoView({behavior:reduceMo?"auto":"smooth", block:"nearest"});
+    }).catch(function(){
+      box.hidden = false;
+      box.innerHTML = '<div class="estimate" style="border-style:solid; border-color:var(--berry-solid)">' +
+        '<p style="font-weight:700">' + (L ? "The order didn't go through." : "O pedido não foi.") + '</p>' +
+        '<p style="font-size:.9rem; color:var(--cocoa-soft); margin-top:6px">' +
+        (L ? "Check your connection and try again — or use “Copy order” and send it on Telegram."
+           : "Confira sua conexão e tente de novo, ou use “Copiar pedido” e mande no Telegram.") + '</p></div>';
+      box.scrollIntoView({behavior:reduceMo?"auto":"smooth", block:"nearest"});
+    }).then(function(){
+      btn.disabled = false; btn.textContent = was;
     });
-    var box = $("#sent-box");
-    box.hidden = false;
-    box.innerHTML = '<div class="estimate" style="border-style:solid"><p class="eyebrow">' +
-      (L?"Order sent":"Pedido enviado") + '</p><p style="font-weight:700; margin-top:8px">' +
-      (L ? "Your order is in the queue." : "Seu pedido entrou na fila.") + '</p>' +
-      '<p style="font-size:.9rem; color:var(--cocoa-soft); margin-top:6px">' +
-      (L ? "So I can reply, also send me the message below on Telegram or Discord — that's where we settle the details and the payment."
-         : "Pra eu conseguir te responder, manda também a mensagem abaixo no Telegram ou Discord: é lá que a gente acerta os detalhes e o pagamento.") + '</p></div>';
-    box.scrollIntoView({behavior:reduceMo?"auto":"smooth", block:"nearest"});
-    /* o painel agora é outra página: ela lê os pedidos ao abrir */
   });
 
   /* abrir o Telegram já com a mensagem na área de transferência:
@@ -688,13 +711,32 @@
   /* moeda acompanha o idioma salvo */
   cur = lang === "en" ? "USD" : "BRL";
   if($("#f-cur")) $("#f-cur").value = cur;
-
-  Studio.load();
   renderStatus(); renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderFilters(); renderGallery();
   renderTypes(); renderYch(); renderTexts(); renderEstimate();
   renderSummary(); renderMarquee();
   if(lang === "en") applyLang();
   setupReveal(); seedfall(); pawTrail();
+
+  /* ---------- conteúdo ao vivo ----------
+     Busca o que está no banco e redesenha. Se falhar (sem internet, banco
+     fora do ar), a página continua exatamente como está — por isso nada
+     aqui é obrigatório para o site funcionar. */
+  var DB = window.SykDB;
+  if(DB && DB.ready){
+    DB.loadContent().then(function(fresh){
+      if(!fresh || !Object.keys(fresh).length) return;
+      state = fresh;
+      renderPrices(); renderExtras(); renderHeroPrice(); renderStatus();
+      renderFilters(); renderGallery(); renderTypes(); renderYch();
+      renderTexts(); renderEstimate(); renderSummary();
+    }).catch(function(){});
+
+    DB.publicQueue().then(function(q){
+      if(!q) return;
+      state.queue = q;
+      renderQueue(); renderStatus();
+    }).catch(function(){});
+  }
 
   /* quem já tem permissão de edição na plataforma não precisa de senha */
   Promise.resolve(window.claude && window.claude.use ? window.claude.use("user") : null)

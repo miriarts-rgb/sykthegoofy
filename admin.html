@@ -15,10 +15,12 @@
 <div class="adm-gate" id="gate">
   <form class="login-box" id="login-form">
     <h2>Painel da artista</h2>
-    <p>Digite sua senha para cuidar de pedidos, preços e galeria.</p>
+    <p>Entre com seu email e senha para cuidar de pedidos, preços e galeria.</p>
+    <label for="login-email">Email</label>
+    <input type="email" id="login-email" autocomplete="username" required>
     <label for="login-pass">Senha</label>
-    <input type="password" id="login-pass" autocomplete="current-password">
-    <p class="login-err" id="login-err" hidden>Senha errada.</p>
+    <input type="password" id="login-pass" autocomplete="current-password" required>
+    <p class="login-err" id="login-err" hidden></p>
     <div class="login-acts">
       <button type="submit" class="btn primary" id="login-go">Entrar</button>
     </div>
@@ -28,14 +30,6 @@
 <div id="adm-wrap" hidden>
   <p class="adm-offline" id="adm-offline" hidden></p>
 <div id="admin" class="adm-page">
-  <div class="adm-head">
-    <h2>Painel da Syk</h2>
-    <div style="display:flex; gap:8px; align-items:center">
-      <span class="adm-who" id="adm-who"></span>
-      <button class="chipbtn" type="button" id="admin-logout">Sair</button>
-      <button class="chipbtn" type="button" id="admin-close">Fechar</button>
-    </div>
-  </div>
   <div class="adm-tabs" id="adm-tabs" role="tablist">
     <button type="button" role="tab" data-tab="pedidos" aria-selected="true">pedidos <span id="tab-badge" hidden></span></button>
     <button type="button" role="tab" data-tab="studio" aria-selected="false">ateliê</button>
@@ -84,15 +78,9 @@
         <p class="mini">Com as comissões abertas e todas as vagas ocupadas, o site mostra “vagas esgotadas” em vez de “fechadas”.</p>
       </div>
       <div class="adm-sec">
-        <h3>Senha do painel</h3>
-        <div class="adm-row" style="grid-template-columns:1fr 1fr auto">
-          <input type="password" id="adm-pass1" placeholder="nova senha" autocomplete="new-password" aria-label="Nova senha">
-          <input type="password" id="adm-pass2" placeholder="repita a senha" autocomplete="new-password" aria-label="Repita a senha">
-          <button class="chipbtn" type="button" id="adm-pass-save">trocar</button>
-        </div>
-        <p class="mini" id="adm-pass-msg">A senha vale depois de publicar. Ela protege contra curiosos, não é
-        segurança de verdade: quem abre o código do site consegue ver como ela é conferida. Nada crítico depende
-        dela — os dados do ateliê ficam só neste navegador.</p>
+        <h3>Contas e senhas</h3>
+        <p class="mini">O login agora é do Supabase, conferido no servidor. Para trocar a senha ou
+        adicionar alguém, entre no painel do Supabase em <b>Authentication → Users</b>.</p>
       </div>
     </div>
 
@@ -177,5 +165,8 @@
 </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/db.js"></script>
 <script src="js/core.js"></script>
 <script src="js/admin.js"></script>
