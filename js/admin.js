@@ -43,9 +43,9 @@
       $("#adm-state").textContent = "primeira vez: confira e clique em Salvar no site";
       var w = $("#adm-offline");
       w.hidden = false;
-      w.innerHTML = "<b>Faltou gravar o conteúdo no banco.</b> Carreguei aqui o que o site já mostra " +
-        "(preços, artes, YCH e textos). Confira e clique em <b>Salvar no site</b> uma vez — " +
-        "a partir daí o painel passa a comandar o site.";
+      w.innerHTML = "<b>Faltava conteúdo no banco.</b> Completei com o que o site já mostra " +
+        "(preços, artes e textos), mantendo o que você já tinha salvo. " +
+        "Confira e clique em <b>Salvar no site</b> uma vez — a partir daí o painel comanda o site.";
     }
     renderAdmin();
   }
@@ -92,19 +92,28 @@
       .catch(function(){ return {}; });
   }
 
+  /* "vazio" não é só {}: um salvamento feito antes desta tela existir pode
+     ter gravado só um pedaço (o YCH, por exemplo). Se faltar o essencial,
+     completa com o conteúdo do site SEM pisar no que já foi editado. */
+  function isIncomplete(s){
+    return !s || !s.prices || !s.prices.length;
+  }
+
   function loadAll(){
     return Promise.all([DB.loadContent(), DB.listOrders(), DB.listCommissions()])
       .then(function(r){
         orders = r[1] || [];
         commissions = r[2] || [];
         var fromDb = r[0] || {};
-        if(Object.keys(fromDb).length){ state = fromDb; return; }
+        if(!isIncomplete(fromDb)){ state = fromDb; return; }
         return seedFromSite().then(function(seed){
-          state = {};
-          if(Object.keys(seed).length){
-            draft = seed;            /* já entra como alteração pendente */
-            needsFirstSave = true;
-          }
+          state = fromDb;
+          if(!Object.keys(seed).length) return;
+          /* semente como base, banco por cima: o que você já salvou vence */
+          var merged = C.clone(seed);
+          Object.keys(fromDb).forEach(function(k){ merged[k] = fromDb[k]; });
+          draft = merged;
+          needsFirstSave = true;
         });
       });
   }
