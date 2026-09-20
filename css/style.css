@@ -680,3 +680,15 @@ dialog#lightbox::backdrop{background:rgba(30,20,16,.82)}
   .adm-row{grid-template-columns:1fr auto auto}
   section{padding-block:48px}
 }
+
+/* fila fechada: o aviso abre o formulário, os botões que levam a ele
+   ficam apagados mas continuam clicáveis — dá para ver o orçamento */
+.closed-note{background:var(--sun-pale); color:var(--cocoa);
+  border:2px solid var(--line); border-radius:14px;
+  padding:13px 16px; margin-bottom:20px; font-size:.9rem; line-height:1.55}
+.closed-note b{color:var(--sun)}
+.btn.is-off{background:var(--cream-deep); color:var(--cocoa-soft);
+  border-color:var(--line); box-shadow:none}
+.btn.is-off:hover{background:var(--cream-deep); color:var(--cocoa-soft)}
+.btn:disabled{background:var(--cream-deep); color:var(--cocoa-soft);
+  border-color:var(--line); cursor:not-allowed; box-shadow:none}

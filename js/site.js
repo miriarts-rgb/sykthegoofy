@@ -43,7 +43,7 @@
     });
     $("#lang-btn").textContent = lang === "en" ? "PT" : "EN";
     document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
-    renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderStatus(); renderFilters(); renderGallery();
+    renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderStatus(); renderOrderGate(); renderFilters(); renderGallery();
     renderTypes(); renderYch(); renderTexts(); renderEstimate();
     renderSummary(); renderMarquee(); syncYchFields();
   }
@@ -56,11 +56,19 @@
     applyLang();
   });
 
-  /* ---------- status ---------- */
-  function renderStatus(){
+  /* ---------- status ----------
+     Aberto, lotado e fechado são três coisas diferentes, e antes só o
+     texto do status sabia disso. Agora sai daqui, e o título das vagas,
+     o formulário e os botões de pedido leem a mesma resposta. */
+  function vagas(){
     var s = S(), taken = (s.queue||[]).filter(function(q){return q.stage!=="done";}).length;
     var free = Math.max(0, (s.slotsTotal||0) - taken);
-    var full = s.open && free === 0;
+    return {taken:taken, free:free, open:!!s.open, full:!!s.open && free === 0,
+            total:s.slotsTotal||0, podePedir:!!s.open && free > 0};
+  }
+  function renderStatus(){
+    var s = S(), v = vagas();
+    var taken = v.taken, free = v.free, full = v.full;
     $("#status-dot").className = "dot " + (s.open && !full ? "open" : "closed");
     $("#status-text").textContent = full
       ? (lang==="en" ? "Every slot is taken" : "Todas as vagas estão ocupadas")
@@ -82,10 +90,58 @@
         box.appendChild(d);
       }
     });
+    var tit = $("#slots-title");
+    if(tit) tit.textContent = full
+      ? (lang==="en" ? "Slots full" : "Vagas esgotadas")
+      : s.open
+        ? (lang==="en" ? "Open slots" : "Vagas abertas")
+        : (lang==="en" ? "Slots closed" : "Vagas fechadas");
     var st = $("#slot-text");
     if(st) st.textContent = s.open
       ? (lang==="en" ? free + " slot(s) still open out of " + s.slotsTotal + "." : free + " vaga(s) ainda aberta(s) de " + s.slotsTotal + ".")
       : (lang==="en" ? "Closed for now, but the queue below is still moving." : "Fechado por ora, mas a fila abaixo continua andando.");
+  }
+
+  /* Fila fechada ou lotada: o envio direto sai do ar, mas o formulário
+     continua preenchível e o "copiar pedido" continua servindo — quem
+     quer entrar na próxima leva mantém o orçamento pronto na mão. */
+  /* applyLang guarda o texto em português na primeira troca de idioma.
+     Se o portão escrever antes disso, é "Fechado por ora" que fica
+     guardado como o original — e o botão nunca mais volta ao normal.
+     Reservar o original antes de mexer resolve. */
+  function lembraPT(el){
+    if(el && !el.hasAttribute("data-pt")) el.setAttribute("data-pt", el.innerHTML);
+  }
+  function renderOrderGate(){
+    var v = vagas(), L = lang === "en", nota = $("#closed-note"), btn = $("#send-btn");
+    if(nota){
+      nota.hidden = v.podePedir;
+      if(!v.podePedir){
+        nota.innerHTML = "<b>" +
+          (v.full ? (L ? "Every slot is taken." : "Todas as vagas estão ocupadas.")
+                  : (L ? "Commissions are closed right now." : "As comissões estão fechadas no momento.")) +
+          "</b> " +
+          (L ? "You can still fill this in and hit “Copy order” — send it over when they reopen, and the estimate comes with it."
+             : "Você ainda pode preencher e usar “Copiar pedido”: guarde a mensagem e mande quando reabrir, com o orçamento junto.");
+      }
+    }
+    if(btn){
+      lembraPT(btn);
+      btn.disabled = !v.podePedir;
+      btn.textContent = v.podePedir
+        ? (L ? "Send order" : "Enviar pedido")
+        : (L ? "Orders closed" : "Pedidos fechados");
+    }
+    /* os dois botões que levam ao formulário contam a mesma história */
+    [["#ych-cta", L ? "Claim a slot" : "Pegar uma vaga"],
+     [".hero .btn.primary", L ? "Start an order" : "Fazer um pedido"]].forEach(function(par){
+      var el = $(par[0]); if(!el) return;
+      lembraPT(el);
+      el.textContent = v.podePedir ? par[1]
+        : (v.full ? (L ? "Slots full" : "Vagas esgotadas")
+                  : (L ? "Closed for now" : "Fechado por ora"));
+      el.classList.toggle("is-off", !v.podePedir);
+    });
   }
 
   /* ---------- preços ---------- */
@@ -622,6 +678,7 @@
   /* enviar pedido: grava no ateliê e confirma na hora */
   $("#send-btn").addEventListener("click", function(){
     var L = lang === "en";
+    if(!vagas().podePedir){ renderOrderGate(); return; }
     if(!$("#f-name").value.trim()){
       $("#f-name").focus();
       $("#f-name").style.borderColor = "var(--berry-solid)";
@@ -923,7 +980,7 @@
   /* moeda acompanha o idioma salvo */
   cur = lang === "en" ? "USD" : "BRL";
   if($("#f-cur")) $("#f-cur").value = cur;
-  renderStatus(); renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderFilters(); renderGallery();
+  renderStatus(); renderOrderGate(); renderPrices(); renderExtras(); renderHeroPrice(); renderQueue(); renderFilters(); renderGallery();
   renderTypes(); renderYch(); renderTexts(); renderEstimate();
   renderSummary(); renderMarquee(); syncYchFields();
   if(lang === "en") applyLang();
@@ -938,7 +995,7 @@
     DB.loadContent().then(function(fresh){
       if(!fresh || !Object.keys(fresh).length) return;
       state = fresh;
-      renderPrices(); renderExtras(); renderHeroPrice(); renderStatus();
+      renderPrices(); renderExtras(); renderHeroPrice(); renderStatus(); renderOrderGate();
       renderFilters(); renderGallery(); renderTypes(); renderYch();
       renderTexts(); renderEstimate(); renderSummary();
     }).catch(function(){});
@@ -946,7 +1003,7 @@
     DB.publicQueue().then(function(q){
       if(!q) return;
       state.queue = q;
-      renderQueue(); renderStatus();
+      renderQueue(); renderStatus(); renderOrderGate();
     }).catch(function(){});
   }
 
